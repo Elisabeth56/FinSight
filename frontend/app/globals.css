@@ -1,0 +1,300 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-cabinet: 'Sora', sans-serif;
+  
+  --color-dark-900: #0a0f0a;
+  --color-dark-800: #0f1910;
+  --color-dark-700: #142014;
+  --color-green-500: #22c55e;
+  --color-green-400: #4ade80;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-emerald-500: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-inter);
+  background-color: var(--color-dark-900);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-green-500);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green-400);
+}
+
+/* Mesh gradient background */
+.mesh-gradient {
+  background: 
+    radial-gradient(at 40% 20%, rgba(22, 101, 52, 0.2) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(34, 197, 94, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(21, 128, 61, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(22, 101, 52, 0.15) 0px, transparent 50%);
+}
+
+/* Animated gradient lines */
+.animated-lines {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.animated-lines::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 100px,
+    rgba(22, 101, 52, 0.05) 100px,
+    rgba(22, 101, 52, 0.05) 101px
+  );
+  animation: slide 20s linear infinite;
+}
+
+@keyframes slide {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(100px, 100px);
+  }
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(var(--color-dark-800), var(--color-dark-800)) padding-box,
+              linear-gradient(135deg, rgba(22, 101, 52, 0.5), rgba(16, 185, 129, 0.5)) border-box;
+  border: 1px solid transparent;
+}
+
+/* Feature card gradients */
+.feature-card-1 {
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+}
+
+.feature-card-2 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.feature-card-3 {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.feature-card-4 {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* Glow effect */
+.glow-green {
+  box-shadow: 0 0 40px rgba(22, 101, 52, 0.4),
+              0 0 80px rgba(22, 101, 52, 0.2);
+}
+
+/* Text gradient */
+.text-gradient {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero section background */
+.hero-bg {
+  background: linear-gradient(180deg, 
+    #052e16 0%, 
+    #14532d 30%,
+    #166534 60%,
+    #15803d 100%
+  );
+}
+
+/* Curved wave lines */
+.wave-lines {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+}
+
+.wave-lines svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Code block styling */
+.code-block {
+  background: linear-gradient(135deg, #0f1910 0%, #0a0f0a 100%);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Device mockup shadows */
+.device-shadow {
+  box-shadow: 
+    0 50px 100px -20px rgba(0, 0, 0, 0.5),
+    0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(22, 101, 52, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(22, 101, 52, 0.6);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Chart bar animation */
+@keyframes chartGrow {
+  0% {
+    height: 20%;
+  }
+  100% {
+    height: var(--bar-height);
+  }
+}
+
+.chart-bar {
+  animation: chartGrow 1s ease-out forwards;
+}
+
+/* Button hover effect */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Category tag pills */
+.category-pill {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.category-pill:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Section divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(22, 101, 52, 0.4) 50%, 
+    transparent 100%
+  );
+}
+
+/* Chat bubble animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-bubble {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Data pulse animation */
+@keyframes dataPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.data-pulse {
+  animation: dataPulse 2s ease-in-out infinite;
+}

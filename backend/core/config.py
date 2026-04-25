@@ -6,6 +6,7 @@ Import `settings` anywhere — never read os.getenv directly in routes.
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,7 +18,13 @@ class Settings(BaseSettings):
     )
 
     # App
-    env: Literal["development", "staging", "production"] = "development"
+    # Read from APP_ENV (not ENV) — the bare `ENV` name collides with a
+    # shell-exported variable on some systems (e.g. ENV=/etc/profile),
+    # which crashes pydantic-settings validation.
+    env: Literal["development", "staging", "production"] = Field(
+        default="development",
+        validation_alias="APP_ENV",
+    )
     # Comma-separated list of allowed frontend origins.
     # Production example:
     #   FRONTEND_ORIGIN=https://finsight.vercel.app,https://finsight-git-main-yourname.vercel.app

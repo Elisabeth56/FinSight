@@ -73,7 +73,7 @@ export function MonthlyTrendChart({
         />
         <Tooltip
           {...tooltipStyles}
-          formatter={(v: number) => formatMoney(v, currency)}
+          formatter={(v) => formatMoney(Number(v) || 0, currency)}
         />
         <Area
           type="monotone"
@@ -136,7 +136,7 @@ export function CategoryPieChart({
           </Pie>
           <Tooltip
             {...tooltipStyles}
-            formatter={(v: number) => formatMoney(v, currency)}
+            formatter={(v) => formatMoney(Number(v) || 0, currency)}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -184,7 +184,7 @@ export function CategoryBarChart({
         />
         <Tooltip
           {...tooltipStyles}
-          formatter={(v: number) => formatMoney(v, currency)}
+          formatter={(v) => formatMoney(Number(v) || 0, currency)}
         />
         <Bar dataKey="total" fill="#22c55e" radius={[0, 6, 6, 0]} />
       </BarChart>

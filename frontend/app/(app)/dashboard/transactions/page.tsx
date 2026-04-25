@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -38,6 +38,14 @@ const CATEGORIES = [
 const PAGE_SIZE = 25;
 
 export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<TableSkeleton />}>
+      <TransactionsContent />
+    </Suspense>
+  );
+}
+
+function TransactionsContent() {
   const params = useSearchParams();
   const anomalyOnly = params.get("anomaly") === "1";
 

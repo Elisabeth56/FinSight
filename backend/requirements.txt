@@ -1,0 +1,41 @@
+# ===== Web framework =====
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17       # for file uploads
+
+# ===== Config & validation =====
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# ===== Auth (Supabase JWT verification) =====
+PyJWT[crypto]==2.10.1
+cryptography==44.0.0
+
+# ===== Database (Supabase / Postgres) =====
+supabase==2.10.0
+postgrest==0.18.0
+
+# ===== HTTP client (Paystack, Groq fallback) =====
+# supabase 2.10.0 pins httpx<0.28 — let pip pick a compatible version in that range
+httpx>=0.26,<0.28
+
+# ===== Section 2: AI pipeline =====
+llama-index==0.12.8
+llama-index-llms-groq==0.3.1
+# llama-index-embeddings-huggingface==0.4.0
+# ^ Removed: pulls in torch, which has no Intel-Mac wheels for Python 3.13.
+#   We don't use local embeddings anywhere in the code. If we ever need
+#   semantic search, switch to a hosted embeddings API (OpenAI, Cohere,
+#   Voyage) — one HTTP call, no torch.
+groq==0.13.0
+pandas==2.2.3                  # CSV parsing + trend math
+pdfplumber==0.11.4             # PDF statement parsing
+numpy==2.2.0                   # anomaly detection (z-score / IQR)
+
+# ===== Section 3: Paystack webhooks =====
+# (paystack is pure HTTP via httpx — no SDK needed)
+
+# ===== Dev =====
+pytest==8.3.4
+pytest-asyncio==0.25.0

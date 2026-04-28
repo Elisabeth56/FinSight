@@ -43,7 +43,7 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/signin">
+            <Link href="/login">
              <button className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors">
               Sign In
              </button>

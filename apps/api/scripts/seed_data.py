@@ -144,9 +144,17 @@ def demo_statements() -> list[Statement]:
         for d, desc, merchant, amount, cat in MARCH
     ]
     return [
-        Statement("opay_statement_january.pdf", date(2026, 1, 1), date(2026, 1, 31),
-                  spread(2026, 1, JANUARY)),
-        Statement("opay_statement_february.pdf", date(2026, 2, 1), date(2026, 2, 28),
-                  spread(2026, 2, FEBRUARY)),
+        Statement(
+            "opay_statement_january.pdf",
+            date(2026, 1, 1),
+            date(2026, 1, 31),
+            spread(2026, 1, JANUARY),
+        ),
+        Statement(
+            "opay_statement_february.pdf",
+            date(2026, 2, 1),
+            date(2026, 2, 28),
+            spread(2026, 2, FEBRUARY),
+        ),
         Statement("opay_statement_march.pdf", date(2026, 3, 1), date(2026, 3, 31), march),
     ]

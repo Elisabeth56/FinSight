@@ -50,7 +50,8 @@ def seed() -> None:
     with connect() as conn, conn.transaction():
         conn.execute(
             "insert into profiles (id, email, full_name) values (%s, %s, %s)"
-            " on conflict (id) do update set email = excluded.email, full_name = excluded.full_name",
+            " on conflict (id) do update"
+            " set email = excluded.email, full_name = excluded.full_name",
             (user_id, DEMO_EMAIL, DEMO_NAME),
         )
         conn.execute("delete from statements where user_id = %s", (user_id,))

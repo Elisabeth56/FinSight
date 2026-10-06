@@ -1,138 +1,124 @@
-"""
-Savings opportunity report.
+"""Savings report: SQL works out monthly spend, the model picks the cuts, code does the maths.
 
-We compute real aggregates (total spend per category over the last 90 days,
-top merchants, recurring subscription candidates), hand those to the LLM,
-and ask for 3-5 concrete opportunities with estimated monthly savings.
+The model only chooses a target and a percentage; every naira figure in the report is computed
+here from the user's own rows, so totals always add up.
 """
 
-from __future__ import annotations
+from pydantic import BaseModel, Field
 
-import logging
-from collections import defaultdict
-from decimal import Decimal
-from typing import Any
-
+from app.ai.llm import fenced, generate_json, load_prompt
 from app.db import connect
-from app.groq_client import chat_json
 
-logger = logging.getLogger(__name__)
-
-
-REPORT_SYSTEM = """You are a financial coach analyzing a user's real spending.
-
-Given aggregated spending data, produce a savings opportunity report as JSON:
-
-{
-  "summary": "1-2 sentence overview of the user's financial picture.",
-  "total_monthly_savings": <estimated total monthly savings in currency units>,
-  "opportunities": [
-    {
-      "title": "Short headline",
-      "description": "1-2 sentence explanation grounded in the data.",
-      "category": "Category name",
-      "estimated_monthly_savings": <number>
-    }
-  ]
-}
-
-Rules:
-- Produce 3 to 5 opportunities.
-- Ground every claim in the provided data. Cite categories or merchants.
-- Be realistic — don't suggest cutting essentials by 90%.
-- Estimates should sum to roughly "total_monthly_savings".
-- No markdown, no prose outside JSON."""
+WINDOW_DAYS = 90
 
 
-def _aggregate_spending(user_id: str) -> dict[str, Any]:
-    """Pull 90 days of spend, ending at the user's latest transaction, and aggregate it."""
+class Pick(BaseModel):
+    target: str
+    title: str = Field(max_length=80)
+    description: str = Field(max_length=240)
+    cut_percent: int = Field(ge=5, le=100)
+
+
+class Picks(BaseModel):
+    summary: str = Field(max_length=240)
+    opportunities: list[Pick] = Field(min_length=1, max_length=6)
+
+
+class Opportunity(BaseModel):
+    title: str
+    description: str
+    target: str
+    monthly_minor: int
+    saving_minor: int
+
+
+class Report(BaseModel):
+    currency: str
+    window_days: int
+    summary: str
+    total_saving_minor: int
+    opportunities: list[Opportunity]
+
+
+def spending_candidates(user_id: str) -> tuple[str, dict[str, dict]]:
+    """Average monthly spend per category and per name over the last 90 days of data."""
     with connect() as conn:
         rows = conn.execute(
-            "select transaction_date, description, amount_minor / 100.0 as amount, category,"
-            " currency from transactions where user_id = %s and transaction_date >"
-            " (select max(transaction_date) from transactions where user_id = %s) - 90",
-            (user_id, user_id),
+            "with window_rows as ("
+            "  select * from transactions where user_id = %s and amount_minor < 0"
+            "  and transaction_date > (select max(transaction_date) from transactions"
+            "                          where user_id = %s) - %s"
+            "  and currency = (select currency from transactions where user_id = %s"
+            "                  group by currency order by count(*) desc limit 1))"
+            " select 'C' as kind, category as name, currency, sum(-amount_minor) as total,"
+            "   count(distinct date_trunc('month', transaction_date)) as months"
+            " from window_rows where category not in ('Transfers', 'Income')"
+            " group by category, currency"
+            " union all"
+            " select 'M', coalesce(merchant, description), currency, sum(-amount_minor),"
+            "   count(distinct date_trunc('month', transaction_date))"
+            " from window_rows where category not in ('Transfers', 'Income')"
+            " group by 2, currency order by total desc",
+            (user_id, user_id, WINDOW_DAYS, user_id),
         ).fetchall()
-
     if not rows:
-        return {"empty": True}
+        return "NGN", {}
 
-    currency = rows[0].get("currency", "USD")
-    by_category: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
-    by_merchant: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
-    merchant_counts: dict[str, int] = defaultdict(int)
-    total_expense = Decimal("0")
-    total_income = Decimal("0")
-
+    span_months = max(r["months"] for r in rows)
+    currency = rows[0]["currency"].strip()
+    candidates: dict[str, dict] = {}
+    counters = {"C": 0, "M": 0}
     for r in rows:
-        amt = Decimal(str(r["amount"]))
-        cat = r.get("category") or "Other"
-        desc = r["description"]
-
-        if amt < 0:
-            expense = abs(amt)
-            by_category[cat] += expense
-            total_expense += expense
-            # Normalize merchant key — strip trailing numbers/refs
-            merchant = desc.strip().upper()[:40]
-            by_merchant[merchant] += expense
-            merchant_counts[merchant] += 1
-        else:
-            total_income += amt
-
-    top_categories = sorted(by_category.items(), key=lambda kv: kv[1], reverse=True)[:6]
-    top_merchants = sorted(by_merchant.items(), key=lambda kv: kv[1], reverse=True)[:8]
-    # Candidates for recurring subscriptions: same merchant, 2+ times
-    recurring = [
-        {"merchant": m, "times": merchant_counts[m], "total": float(by_merchant[m])}
-        for m, _ in top_merchants
-        if merchant_counts[m] >= 2
-    ][:5]
-
-    return {
-        "empty": False,
-        "currency": currency,
-        "window_days": 90,
-        "total_expense": float(total_expense),
-        "total_income": float(total_income),
-        "top_categories": [{"category": c, "total": float(t)} for c, t in top_categories],
-        "top_merchants": [{"merchant": m, "total": float(t)} for m, t in top_merchants],
-        "recurring_candidates": recurring,
-    }
-
-
-def generate_savings_report(user_id: str) -> dict[str, Any]:
-    """Compute aggregates + ask LLM for opportunities. Returns a dict ready for JSON response."""
-    agg = _aggregate_spending(user_id)
-    if agg.get("empty"):
-        return {
-            "empty": True,
-            "message": "Upload a bank statement to generate your savings report.",
+        if r["kind"] == "M" and counters["M"] >= 12:
+            continue
+        counters[r["kind"]] += 1
+        candidates[f"{r['kind']}{counters[r['kind']]}"] = {
+            "name": r["name"],
+            "monthly_minor": int(r["total"]) // span_months,
+            "repeats": r["months"] > 1,
         }
+    return currency, candidates
 
-    window = agg["window_days"]
-    user_prompt = f"""Here is the user's aggregated spending over the last {window} days.
-Currency: {agg["currency"]}
-Total expenses: {agg["total_expense"]}
-Total income: {agg["total_income"]}
 
-Top categories by spend:
-{agg["top_categories"]}
+def build_report(user_id: str) -> Report | None:
+    currency, candidates = spending_candidates(user_id)
+    if not candidates:
+        return None
 
-Top merchants:
-{agg["top_merchants"]}
+    listing = "\n".join(
+        f"{key}: {c['name']}, {c['monthly_minor'] // 100:,} {currency} a month"
+        + (", repeats" if c["repeats"] else "")
+        for key, c in candidates.items()
+    )
+    picks = generate_json(
+        system=load_prompt("savings"),
+        user=fenced("spending", listing),
+        schema=Picks,
+        size="large",
+        temperature=0.2,
+        name="savings",
+    )
 
-Likely recurring subscriptions:
-{agg["recurring_candidates"]}
-
-Generate the savings report."""
-
-    try:
-        report = chat_json(system=REPORT_SYSTEM, user=user_prompt, max_tokens=2048)
-    except Exception as e:
-        logger.error("Savings report generation failed: %s", e)
-        return {"empty": False, "error": "Could not generate report right now."}
-
-    report["currency"] = agg["currency"]
-    report["window_days"] = agg["window_days"]
-    return report
+    # compute every amount here; drop picks that point at something we didn't list
+    opportunities = []
+    for pick in picks.opportunities:
+        target = candidates.get(pick.target)
+        if target is None:
+            continue
+        saving = round(target["monthly_minor"] * pick.cut_percent / 100 / 10_000) * 10_000
+        opportunities.append(
+            Opportunity(
+                title=pick.title,
+                description=pick.description,
+                target=target["name"],
+                monthly_minor=target["monthly_minor"],
+                saving_minor=saving,
+            )
+        )
+    return Report(
+        currency=currency,
+        window_days=WINDOW_DAYS,
+        summary=picks.summary,
+        total_saving_minor=sum(o.saving_minor for o in opportunities),
+        opportunities=opportunities,
+    )

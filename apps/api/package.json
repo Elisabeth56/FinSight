@@ -5,6 +5,8 @@
     "dev": "uv run uvicorn main:app --reload --port 8000",
     "lint": "uv run ruff check . && uv run ruff format --check .",
     "typecheck": "uv run pyright",
-    "test": "uv run pytest -q"
+    "test": "uv run pytest -q",
+    "db:migrate": "uv run python -m scripts.db migrate",
+    "db:seed": "uv run python -m scripts.db seed"
   }
 }

@@ -1,0 +1,46 @@
+[project]
+name = "finsight-api"
+version = "0.3.0"
+description = "FinSight API: statement parsing, categorization, analytics and chat"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.17",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.6",
+    "email-validator>=2.2",
+    "PyJWT[crypto]>=2.10",
+    "supabase>=2.10",
+    "httpx>=0.26",
+    "groq>=0.13",
+    "pandas>=2.2",
+    "pdfplumber>=0.11",
+    "numpy>=2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.8",
+    "pyright>=1.1.390",
+]
+
+[tool.vercel]
+entrypoint = "main:app"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares dependencies as call defaults by design
+extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query", "fastapi.Header"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"

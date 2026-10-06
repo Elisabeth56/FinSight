@@ -14,8 +14,6 @@ __pycache__/
 venv/
 env/
 .venv/
-backend/venv/
-backend/.venv/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -52,4 +50,4 @@ uploads/
 tmp/
 *.pdf
 *.csv
-!backend/db/*.sql
+!**/fixtures/**

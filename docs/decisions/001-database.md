@@ -1,6 +1,6 @@
 # 001. Database: Neon Postgres, accessed only through the API
 
-Status: Proposed
+Status: Accepted (2026-10-06)
 
 ## Context
 

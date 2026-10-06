@@ -1,6 +1,6 @@
 # 003. Backend shape and hosting: FastAPI on Vercel's Python runtime
 
-Status: Proposed
+Status: Accepted (2026-10-06)
 
 ## Context
 

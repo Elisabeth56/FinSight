@@ -1,6 +1,6 @@
 # 004. AI pipeline: plain Groq SDK, SQL-computed numbers, deduplicated categorization
 
-Status: Proposed
+Status: Accepted (2026-10-06)
 
 ## Context
 

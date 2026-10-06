@@ -1,6 +1,6 @@
 # 005. Payments: one-time Pro passes, verified on return, no webhooks
 
-Status: Proposed
+Status: Accepted (2026-10-06)
 
 ## Context
 

@@ -1,6 +1,6 @@
 # 002. Auth: Neon Auth (managed Better Auth)
 
-Status: Proposed. Depends on the JWT spike below.
+Status: Accepted (2026-10-06). Depends on the JWT spike below.
 
 ## Context
 

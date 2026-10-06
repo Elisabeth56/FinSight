@@ -10,13 +10,11 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
-from supabase import Client
-
-from services.groq_client import chat_json
+from app.db import connect
+from app.groq_client import chat_json
 
 logger = logging.getLogger(__name__)
 
@@ -46,19 +44,15 @@ Rules:
 - No markdown, no prose outside JSON."""
 
 
-def _aggregate_spending(supabase: Client, user_id: str) -> dict[str, Any]:
-    """Pull last-90-day spend and compute useful aggregates."""
-    since = (date.today() - timedelta(days=90)).isoformat()
-
-    rows = (
-        supabase.table("transactions")
-        .select("transaction_date, description, amount, category, currency")
-        .eq("user_id", user_id)
-        .gte("transaction_date", since)
-        .execute()
-        .data
-        or []
-    )
+def _aggregate_spending(user_id: str) -> dict[str, Any]:
+    """Pull 90 days of spend, ending at the user's latest transaction, and aggregate it."""
+    with connect() as conn:
+        rows = conn.execute(
+            "select transaction_date, description, amount_minor / 100.0 as amount, category,"
+            " currency from transactions where user_id = %s and transaction_date >"
+            " (select max(transaction_date) from transactions where user_id = %s) - 90",
+            (user_id, user_id),
+        ).fetchall()
 
     if not rows:
         return {"empty": True}
@@ -107,9 +101,9 @@ def _aggregate_spending(supabase: Client, user_id: str) -> dict[str, Any]:
     }
 
 
-def generate_savings_report(supabase: Client, user_id: str) -> dict[str, Any]:
+def generate_savings_report(user_id: str) -> dict[str, Any]:
     """Compute aggregates + ask LLM for opportunities. Returns a dict ready for JSON response."""
-    agg = _aggregate_spending(supabase, user_id)
+    agg = _aggregate_spending(user_id)
     if agg.get("empty"):
         return {
             "empty": True,

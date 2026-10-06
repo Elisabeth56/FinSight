@@ -18,7 +18,7 @@ from decimal import Decimal, InvalidOperation
 import pandas as pd
 import pdfplumber
 
-from schemas.transactions import ParsedTransaction, ParseResult
+from app.features.statements.schemas import ParsedTransaction, ParseResult
 
 logger = logging.getLogger(__name__)
 

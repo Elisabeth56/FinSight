@@ -19,7 +19,7 @@ from datetime import date
 from decimal import Decimal
 from statistics import mean, pstdev
 
-from schemas.transactions import ParsedTransaction
+from app.features.statements.schemas import ParsedTransaction
 
 Z_THRESHOLD = 2.5
 MIN_SAMPLES = 5  # don't flag without enough history

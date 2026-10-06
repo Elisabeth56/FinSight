@@ -10,7 +10,7 @@ from typing import Any
 
 from groq import AsyncGroq, Groq
 
-from core.config import settings
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 

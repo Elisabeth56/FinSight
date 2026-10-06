@@ -14,8 +14,8 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterable
 
-from schemas.transactions import CATEGORIES, ParsedTransaction
-from services.groq_client import chat_json
+from app.features.statements.schemas import CATEGORIES, ParsedTransaction
+from app.groq_client import chat_json
 
 logger = logging.getLogger(__name__)
 

@@ -77,7 +77,8 @@ def upload_statement(user: User, contents: bytes, filename: str, content_type: s
         )
 
     # categorize and flag against the last 90 days of the same user's spending
-    categories = categorize_all(parsed.transactions)
+    labels = categorize_all(parsed.transactions)
+    categories = [label.category for label in labels]
     flags = detect_anomalies(parsed.transactions, categories, _history(user.id))
 
     # store statement and rows together
@@ -104,23 +105,23 @@ def upload_statement(user: User, contents: bytes, filename: str, content_type: s
         with conn.cursor() as cur:
             cur.executemany(
                 "insert into transactions (user_id, statement_id, transaction_date, description,"
-                " amount_minor, currency, category, is_anomaly, raw)"
-                " values (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                " merchant, amount_minor, currency, category, category_source, is_anomaly, raw)"
+                " values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 [
                     (
                         user.id,
                         statement["id"],
                         t.transaction_date,
                         t.description,
+                        label.merchant,
                         to_minor(t.amount),
                         parsed.currency,
-                        category,
+                        label.category,
+                        label.source,
                         flag,
                         Jsonb(t.raw),
                     )
-                    for t, category, flag in zip(
-                        parsed.transactions, categories, flags, strict=True
-                    )
+                    for t, label, flag in zip(parsed.transactions, labels, flags, strict=True)
                 ],
             )
     return StatementOut(**statement, anomaly_count=sum(flags))

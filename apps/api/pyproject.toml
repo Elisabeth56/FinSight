@@ -11,7 +11,6 @@ dependencies = [
     "pydantic-settings>=2.6",
     "email-validator>=2.2",
     "PyJWT[crypto]>=2.10",
-    "supabase>=2.10",
     "httpx>=0.26",
     "groq>=0.13",
     "pandas>=2.2",
@@ -30,7 +29,7 @@ dev = [
 ]
 
 [tool.vercel]
-entrypoint = "main:app"
+entrypoint = "app.main:app"
 
 [tool.ruff]
 line-length = 100
@@ -44,5 +43,6 @@ select = ["E", "F", "B", "I", "UP"]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query", "fastapi.Header"]
 
 [tool.pyright]
+include = ["app"]
 pythonVersion = "3.12"
 typeCheckingMode = "basic"

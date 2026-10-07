@@ -14,15 +14,17 @@ Two LLM calls per user message:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import AsyncIterator
 from datetime import date
 
+from psycopg import sql
 from pydantic import BaseModel, Field
-from supabase import Client
 
-from schemas.transactions import CATEGORIES
-from services.groq_client import chat_json, chat_stream
+from app.db import connect
+from app.features.statements.schemas import CATEGORIES
+from app.groq_client import chat_json, chat_stream
 
 logger = logging.getLogger(__name__)
 
@@ -72,27 +74,29 @@ def _extract_intent(message: str) -> QueryIntent:
 # ---------------------------------------------------------------------------
 # Retrieval
 # ---------------------------------------------------------------------------
-def _fetch_transactions(
-    supabase: Client,
-    user_id: str,
-    intent: QueryIntent,
-) -> list[dict]:
-    q = (
-        supabase.table("transactions")
-        .select("transaction_date, description, amount, category, is_anomaly")
-        .eq("user_id", user_id)
-    )
+def _fetch_transactions(user_id: str, intent: QueryIntent) -> list[dict]:
+    where, params = [sql.SQL("user_id = %s")], [user_id]
     if intent.start_date:
-        q = q.gte("transaction_date", intent.start_date)
+        where.append(sql.SQL("transaction_date >= %s"))
+        params.append(intent.start_date)
     if intent.end_date:
-        q = q.lte("transaction_date", intent.end_date)
+        where.append(sql.SQL("transaction_date <= %s"))
+        params.append(intent.end_date)
     if intent.category:
-        q = q.eq("category", intent.category)
+        where.append(sql.SQL("category = %s"))
+        params.append(intent.category)
     if intent.keyword:
-        q = q.ilike("description", f"%{intent.keyword}%")
-
-    q = q.order("transaction_date", desc=True).limit(intent.limit)
-    return q.execute().data or []
+        where.append(sql.SQL("(description ilike %s or merchant ilike %s)"))
+        params += [f"%{intent.keyword}%", f"%{intent.keyword}%"]
+    with connect() as conn:
+        query = sql.SQL(
+            "select transaction_date, description, amount_minor / 100.0 as amount, category,"
+            " is_anomaly from transactions where {} order by transaction_date desc limit %s"
+        ).format(sql.SQL(" and ").join(where))
+        return conn.execute(
+            query,
+            (*params, intent.limit),
+        ).fetchall()
 
 
 # ---------------------------------------------------------------------------
@@ -128,16 +132,16 @@ def _format_context(transactions: list[dict], currency: str) -> str:
 
 
 async def stream_chat(
-    supabase: Client,
     user_id: str,
     message: str,
     currency: str = "USD",
 ) -> AsyncIterator[str]:
     """Full pipeline: intent → fetch → stream answer."""
-    intent = _extract_intent(message)
+    # blocking calls run in a thread so other requests keep moving while this one waits
+    intent = await asyncio.to_thread(_extract_intent, message)
     logger.info("Chat intent: %s", intent.model_dump(exclude_none=True))
 
-    transactions = _fetch_transactions(supabase, user_id, intent)
+    transactions = await asyncio.to_thread(_fetch_transactions, user_id, intent)
     context = _format_context(transactions, currency)
 
     user_prompt = f"""User question: {message}

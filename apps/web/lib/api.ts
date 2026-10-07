@@ -3,7 +3,7 @@
 import { getAccessToken } from "@/lib/auth/token";
 
 // In production the web app rewrites /api/* to the API on the same origin, so there's no CORS.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 /** The API's one error shape: {error: {code, message, details}}. `message` is safe to show. */
 export class ApiError extends Error {
@@ -23,7 +23,7 @@ type Options = Omit<RequestInit, "body"> & {
   form?: FormData;
 };
 
-async function authHeader(): Promise<Record<string, string>> {
+export async function authHeader(): Promise<Record<string, string>> {
   const token = await getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -55,11 +55,16 @@ export async function api<T = unknown>(path: string, opts: Options = {}): Promis
 }
 
 async function toApiError(res: Response): Promise<ApiError> {
+  return parseApiError(res.status, await res.text().catch(() => ""));
+}
+
+/** Reads the API's error shape from a response body, or falls back to a calm generic message. */
+export function parseApiError(status: number, text: string): ApiError {
   try {
-    const { error } = await res.json();
-    if (error?.code && error?.message) return new ApiError(res.status, error.code, error.message, error.details);
+    const { error } = JSON.parse(text);
+    if (error?.code && error?.message) return new ApiError(status, error.code, error.message, error.details);
   } catch {
     // not our JSON shape: fall through to a generic message
   }
-  return new ApiError(res.status, "unexpected", "Something went wrong on our side. Try again in a moment.");
+  return new ApiError(status, "unexpected", "Something went wrong on our side. Try again in a moment.");
 }

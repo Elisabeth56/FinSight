@@ -720,6 +720,7 @@ export interface operations {
                 category?: string | null;
                 search?: string | null;
                 flagged?: boolean;
+                statement_id?: string | null;
                 limit?: number;
                 offset?: number;
             };

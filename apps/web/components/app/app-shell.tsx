@@ -2,13 +2,14 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
+import { Avatar } from "@/components/app/avatar";
+import { SignOut } from "@/components/app/sign-out";
 import { UploadProvider } from "@/components/app/upload-provider";
 import { Logo, LogoMark } from "@/components/ui/logo";
-import { authClient } from "@/lib/auth/client";
-import { forgetAccessToken } from "@/lib/auth/token";
 import type { Me } from "@/lib/models";
+import { displayName } from "@/lib/profile";
 import { useApi } from "@/lib/use-api";
 
 const nav = [
@@ -18,6 +19,7 @@ const nav = [
   { label: "Chat", href: "/dashboard/chat" },
   { label: "Savings", href: "/dashboard/savings" },
   { label: "Billing", href: "/dashboard/billing" },
+  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 // phones get the four views people check most; upload sits in the header
@@ -52,7 +54,7 @@ function Sidebar({ pathname }: { pathname: string }) {
         <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
       ))}
       <PlanCard />
-      <SignOut className="mt-auto self-start px-3" />
+      <ProfileRow active={isActive(pathname, "/dashboard/settings")} />
     </nav>
   );
 }
@@ -106,31 +108,48 @@ function MobileHeader() {
         <LogoMark size={30} />
       </Link>
       <div className="flex items-center gap-2">
-        <SignOut className="px-3" />
         <Link
           href="/dashboard/upload"
           className="inline-flex h-11 items-center rounded-full bg-action px-5 text-sm font-semibold text-on-action"
         >
           Upload
         </Link>
+        <ProfileButton />
       </div>
     </header>
   );
 }
 
-function SignOut({ className }: { className?: string }) {
-  const router = useRouter();
-  async function signOut() {
-    forgetAccessToken();
-    // leave either way: a failed call still leaves a session that expires on its own
-    await authClient.signOut().catch(() => null);
-    router.push("/");
-    router.refresh();
-  }
+/** Who's signed in, at the foot of the sidebar; opens Settings. */
+function ProfileRow({ active }: { active: boolean }) {
+  const { data: me } = useApi<Me>("/me");
   return (
-    <button type="button" onClick={signOut} className={clsx("h-11 rounded-full text-sm text-ink-3 hover:text-ink", className)}>
-      Sign out
-    </button>
+    <div className="mt-auto flex flex-col gap-1">
+      {me && (
+        <Link
+          href="/dashboard/settings"
+          aria-current={active ? "page" : undefined}
+          className={clsx("flex items-center gap-3 rounded-2xl p-2.5 transition-colors", active ? "bg-surface" : "hover:bg-surface/60")}
+        >
+          <Avatar name={me.full_name} email={me.email} />
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-medium">{displayName(me.full_name, me.email)}</span>
+            <span className="truncate text-xs text-ink-3">{me.email}</span>
+          </span>
+        </Link>
+      )}
+      <SignOut className="self-start px-3" />
+    </div>
+  );
+}
+
+/** The signed-in person's initial on phones; opens Settings, where sign-out lives too. */
+function ProfileButton() {
+  const { data: me } = useApi<Me>("/me");
+  return (
+    <Link href="/dashboard/settings" aria-label="Settings" className="inline-flex size-11 items-center justify-center rounded-full">
+      {me ? <Avatar name={me.full_name} email={me.email} /> : <span className="size-9 rounded-full bg-sunk" />}
+    </Link>
   );
 }
 

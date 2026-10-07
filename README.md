@@ -4,67 +4,32 @@ AI-powered personal finance intelligence. Upload a bank statement, chat with you
 
 **Stack**: Next.js 16 (App Router) · FastAPI · Supabase (Postgres + Auth) · Groq (LLaMA 3.3) · LlamaIndex · Recharts · Paystack
 
+> This project is being remodelled. Progress is tracked in #22 and decisions in `docs/decisions/`.
+
 ## Project layout
 
 ```
 finsight/
-├── backend/          # FastAPI · Python 3.11
-├── frontend/         # Next.js · TypeScript · Tailwind
-├── DEPLOYMENT.md     # Production deploy guide (Railway + Vercel)
-└── .gitignore
+├── apps/
+│   ├── web/          # Next.js · TypeScript · Tailwind
+│   └── api/          # FastAPI · Python 3.12 · uv
+├── docs/             # architecture and decision records
+└── pnpm-workspace.yaml
 ```
 
 ## Local development
 
-### Prerequisites
-- Python 3.11 (pyenv recommended)
-- Node.js 20+
-- A Supabase project (free tier is fine)
-- A Groq API key (free tier)
-- A Paystack test account
-
-### Backend
+Prerequisites: Node 22 with pnpm, Python 3.12+ with [uv](https://docs.astral.sh/uv/).
 
 ```bash
-cd backend
-python3.11 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env        # fill in values
-uvicorn main:app --reload
+pnpm install
+(cd apps/api && uv sync)
+cp apps/web/.env.example apps/web/.env.local   # fill in values
+cp apps/api/.env.example apps/api/.env          # fill in values
+pnpm dev                                        # web on :3000, API on :8000
 ```
 
-Visit `http://localhost:8000/docs`.
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-cp .env.example .env.local  # fill in values
-npm run dev
-```
-
-Visit `http://localhost:3000`.
-
-### Supabase setup
-
-Run these SQL files in the Supabase SQL editor in order:
-
-1. `backend/db/schema.sql` — users, statements, transactions, RLS
-2. `backend/db/schema_section3.sql` — Paystack subscriptions, webhook log
-
-Then in **Authentication → Providers**, enable **Google** (requires a Google Cloud OAuth client).
-
-## Deployment
-
-See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the full walkthrough.
-
-**Short version**:
-- Frontend → Vercel (root directory: `frontend`)
-- Backend → Railway (root directory: `backend`)
-- Database + Auth → Supabase
-- Payments → Paystack
+`pnpm lint`, `pnpm typecheck` and `pnpm test` run across both apps.
 
 ## Features
 

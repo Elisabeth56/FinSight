@@ -1,36 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
-const PROTECTED_PREFIXES = ["/dashboard"];
-const AUTH_PAGES = ["/login", "/signup"];
+import { auth } from "@/lib/auth/server";
+
+// Neon Auth's middleware checks the session, refreshes its cookies and finishes the Google
+// sign-in (it swaps the verifier in the callback URL for a session cookie)
+const protect = auth?.middleware({ loginUrl: "/login" });
 
 export async function proxy(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
-  const { pathname } = request.nextUrl;
+  const res = protect ? await protect(request) : NextResponse.redirect(new URL("/login", request.url));
 
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-  const isAuthPage = AUTH_PAGES.includes(pathname);
-
-  // Unauthenticated user trying to reach the app → send to /login
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  // remember where they were headed, so sign-in can bring them back
+  const location = res.headers.get("location");
+  if (location && new URL(location).pathname === "/login") {
+    const url = new URL(location);
+    url.searchParams.set("next", request.nextUrl.pathname);
+    res.headers.set("location", url.toString());
   }
-
-  // Already signed in? /login and /signup have nothing for you
-  if (isAuthPage && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
-
-  return supabaseResponse;
+  return res;
 }
 
-// only app and auth routes need the session; marketing pages stay static and auth-free
+// only the app needs a session; marketing and auth pages stay static and auth-free
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/signup"],
+  matcher: ["/dashboard/:path*"],
 };

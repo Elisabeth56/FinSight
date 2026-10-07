@@ -10,6 +10,7 @@ from app.config import settings
 from app.features.analytics.router import router as analytics
 from app.features.chat.router import router as chat
 from app.features.me.router import router as me
+from app.features.payments.router import router as payments
 from app.features.reports.router import router as reports
 from app.features.statements.router import router as statements
 from app.features.transactions.router import router as transactions
@@ -42,5 +43,5 @@ def health() -> dict:
     return {"ok": True}
 
 
-for router in (me, statements, transactions, analytics, chat, reports):
+for router in (me, statements, transactions, analytics, chat, reports, payments):
     app.include_router(router)

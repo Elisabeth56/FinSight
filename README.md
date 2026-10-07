@@ -96,8 +96,8 @@ You need Node 22 with pnpm, Python 3.12 with [uv](https://docs.astral.sh/uv/), a
 pnpm install
 (cd apps/api && uv sync)
 cp apps/web/.env.example apps/web/.env.local
-cp apps/api/.env.example apps/api/.env        # set DATABASE_URL; AI and Paystack keys are optional
-pnpm db:migrate && pnpm db:seed               # schema plus the demo account's three months
+cp apps/api/.env.example apps/api/.env        # DATABASE_URL, Neon Auth and DEMO_PASSWORD; AI and Paystack keys are optional
+pnpm db:migrate && pnpm db:seed               # schema, the demo user in Neon Auth, and its three months
 pnpm dev                                      # web on :3000, API on :8000
 ```
 
@@ -113,7 +113,6 @@ Without `GROQ_API_KEY` or `GEMINI_API_KEY`, uploads still work and every row lan
 
 ## Limitations and next steps
 
-- Sign-in moves to Neon Auth with Google and email ([#6](https://github.com/Elisabeth56/FinSight/issues/6)); until then you can't sign in locally, and the demo account is reached through the seed.
 - Scanned (image-only) PDFs aren't read. The app says so and suggests the CSV export.
 - Anomaly detection is a per-category z-score. It catches a ₦45,000 Jumia order in a month of ₦15,000 ones, but not a slow creep.
 - One currency per statement: a statement that mixes currencies is read as a single one.

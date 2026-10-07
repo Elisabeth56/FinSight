@@ -81,7 +81,7 @@ flowchart LR
 
 | Risk | Check |
 |---|---|
-| FastAPI can't verify Neon Auth sessions cleanly | Spike first: sign in on web, call a protected API route |
+| FastAPI can't verify Neon Auth sessions cleanly | Spike passed (Oct 7): Neon Auth issues EdDSA JWTs that FastAPI verifies against the JWKS URL (ADR 002) |
 | SSE through the Next.js rewrite gets buffered | Spike: stream 20 tokens through the rewrite and time each |
 | pandas + pdfplumber bundle exceeds Vercel's Python limit (500 MB) | First preview deploy; removing LlamaIndex already saves a lot |
 | Statements over 4.5 MB (Vercel request body limit) | Cap uploads at 4 MB with a clear message; log rejected sizes |

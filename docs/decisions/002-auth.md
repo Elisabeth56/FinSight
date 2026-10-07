@@ -1,6 +1,6 @@
 # 002. Auth: Neon Auth (managed Better Auth)
 
-Status: Accepted (2026-10-06). Depends on the JWT spike below.
+Status: Accepted (2026-10-06). Spike passed 2026-10-07.
 
 ## Context
 
@@ -34,3 +34,12 @@ The demo account is an email/password user created by the seed script. "Try the 
 ## Revisit when
 
 The spike fails, or MAU nears the free cap.
+
+## Spike result (2026-10-07)
+
+Passed, so Better Auth self-hosting isn't needed.
+
+- `GET <auth url>/token` returns an EdDSA (Ed25519) JWT with `sub`, `email`, `name`, `aud` and `iss` set to the Neon Auth origin, and a 15-minute expiry. `app/auth.py` verifies it against `<auth url>/.well-known/jwks.json` unchanged; a tampered token gets 401.
+- The web app uses `@neondatabase/auth`: its route handler proxies `/api/auth/*` on our own origin, so session cookies are first-party, and its middleware guards `/dashboard` and finishes the Google redirect. The browser gets the JWT from `/api/auth/token` and sends it to the API.
+- Neon Auth checks the request's Origin against its trusted domains. Localhost is trusted by default; the production and preview domains have to be added in the Neon console.
+- The `/api/*` rewrite to FastAPI had to become a `fallback` rewrite. A normal one runs before dynamic routes and swallowed `/api/auth/*`.

@@ -32,15 +32,17 @@ The constraints shaped every decision:
 ## Results
 
 - Parsing: all three fixture statements (a GTBank-style CSV, an Access-style CSV and an OPay-style PDF with wrapped narrations) come out with the exact row count and total, to the kobo. CI checks this on every pull request.
-- Categorization: 102 of 102 labelled narrations right, up from 98 on the first run once the prompt said plainly that streaming subscriptions are bills.
-- Chat: 29 of 30 questions answered with the SQL-computed figure, including 5 it should decline. The miss declines correctly but quotes an unrelated total.
-- Chat latency: 2.2 s at p50 and 3.4 s at p95 for the full streamed answer, on Gemini 3.5 Flash-Lite.
+- Categorization: 102 of 102 labelled narrations right on Gemini, up from 98 on the first run once the prompt said plainly that streaming subscriptions are bills. On Groq's gpt-oss-120b, now the primary model, it's 94 of 102: incoming transfers from people still land in Transfers instead of Income.
+- Chat: 29 of 30 questions answered with the SQL-computed figure on both providers, including 5 it should decline.
+- Chat latency for the full streamed answer: 1.7 s at p50 and 2.4 s at p95 on Groq, against 2.2 s and 3.4 s on Gemini 3.5 Flash-Lite.
 - The first eval run caught a bug no test had: the data ended on 28 March, and the intent model decided "March" meant March of last year, so every question about the current month came back empty. One reworded rule fixed it.
 - Testing uploads end to end showed CSVs with bare amounts were stored as US dollars. They now default to naira.
 
 ## What I learned
 
 Moving the arithmetic out of the model turned a vague quality problem into two checkable ones: did the model pick the right filters, and did it repeat the numbers it was given? The eval can test both, which a prompt tweak never could.
+
+A fallback chain can hide an outage. Groq retired both Llama models the app was configured for, and every request quietly moved to Gemini. Nothing on screen looked wrong. Rerunning the eval with Groq alone showed it at once: every AI call failed. Moving to gpt-oss surfaced a second issue. It reasons before it answers, so a 200-token budget that suited Llama cut its JSON off halfway. I now log which provider answered each request, and I run the eval with the fallback off before trusting a provider change.
 
 Building the eval set before tuning prompts also changed what I worked on. Labelling a hundred real-looking narrations by hand forced me to decide edge cases I had been vague about, such as whether Spotify is entertainment or a bill. The prompt and the labels now agree.
 

@@ -82,7 +82,11 @@ export function Footer() {
         aria-hidden
         className="flex translate-y-[14%] justify-center font-figure text-[clamp(120px,19vw,280px)] leading-[0.78] tracking-[-0.02em] whitespace-nowrap text-[#262624] select-none"
       >
-        FinSight<span className="text-[#ffcf4a]">.</span>
+        {/* the same highlighter swipe as the nav, slowed to suit type this size */}
+        <span className="group swipe cursor-default after:duration-[600ms] after:ease-out-soft">
+          FinSight
+          <span className="text-[#ffcf4a] transition-colors duration-[600ms] group-hover:text-[#262624]">.</span>
+        </span>
       </div>
     </footer>
   );

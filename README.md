@@ -6,7 +6,9 @@ Reads the PDF or CSV statement your Nigerian bank or OPay wallet already gives y
 
 ![FinSight landing page](docs/screenshots/landing-1440.webp)
 
-**Live demo:** goes up with the deploy ([#18](https://github.com/Elisabeth56/FinSight/issues/18)) · **Case study:** [docs/case-study.md](docs/case-study.md) · **Design decisions:** [docs/decisions](docs/decisions)
+**Live demo:** [finsight-elisabeth-nnamanis-projects.vercel.app](https://finsight-elisabeth-nnamanis-projects.vercel.app) (press "Try the demo", no sign-up) · **Demo video:** [75 seconds](docs/media/finsight-demo.mp4) · **Case study:** [docs/case-study.md](docs/case-study.md) · **Design decisions:** [docs/decisions](docs/decisions)
+
+[![The demo video: asking FinSight how much went on Bolt in March](docs/media/demo-poster.webp)](docs/media/finsight-demo.mp4)
 
 ## The problem
 

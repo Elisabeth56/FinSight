@@ -22,10 +22,11 @@ class Settings(BaseSettings):
     auth_jwks_url: str = ""
     auth_audience: str = ""
 
-    # LLM providers in fallback order; check free-tier models before changing these
+    # LLM providers in fallback order; check free-tier models before changing these.
+    # Groq retired its Llama 3.x models; gpt-oss is what its free tier offers now (Oct 2026)
     groq_api_key: str = ""
-    groq_model_large: str = "llama-3.3-70b-versatile"
-    groq_model_small: str = "llama-3.1-8b-instant"
+    groq_model_large: str = "openai/gpt-oss-120b"
+    groq_model_small: str = "openai/gpt-oss-20b"
     gemini_api_key: str = ""
     # flash-lite for both: gemini-3.5-flash's free tier allows 20 requests a day (Oct 2026),
     # and flash-lite scored the same on the chat eval

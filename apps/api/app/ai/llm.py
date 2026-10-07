@@ -51,7 +51,9 @@ def providers() -> list[Provider]:
             settings.groq_api_key,
             {"large": settings.groq_model_large, "small": settings.groq_model_small},
             json_mode=True,
-            extra={},
+            # gpt-oss reasons before answering and those tokens count against max_tokens and the
+            # 8k tokens-a-minute free limit; these tasks are extraction and short answers
+            extra={"reasoning_effort": "low"},
         ),
         Provider(
             "gemini",

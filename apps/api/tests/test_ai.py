@@ -63,6 +63,20 @@ def test_gemini_is_asked_for_json_without_reasoning(monkeypatch):
     assert bodies[0]["response_format"] == {"type": "json_object"}
 
 
+def test_groq_is_asked_for_gpt_oss_with_low_reasoning(monkeypatch):
+    bodies = []
+
+    def post(url, json, **_):
+        bodies.append(json)
+        body = {"choices": [{"message": {"content": '{"value": 1}'}}], "usage": {}}
+        return httpx.Response(200, json=body, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(llm.httpx, "post", post)
+    llm.generate_json(system="s", user="u", schema=Answer, size="small")
+    assert bodies[0]["model"] == "openai/gpt-oss-20b"
+    assert bodies[0]["reasoning_effort"] == "low"
+
+
 def test_invalid_json_is_retried_with_the_error_then_accepted(monkeypatch):
     scripted(monkeypatch, [(200, "not json"), (200, '```json\n{"value": 3}\n```')])
     assert llm.generate_json(system="s", user="u", schema=Answer).value == 3

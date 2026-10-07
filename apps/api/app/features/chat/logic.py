@@ -69,7 +69,8 @@ def extract_intent(question: str, latest: date) -> Intent:
             user=fenced("question", question),
             schema=Intent,
             size="small",
-            max_tokens=200,
+            # room for gpt-oss's reasoning: relative dates took it past 200 and cut the JSON off
+            max_tokens=600,
             name="chat_intent",
         )
     except AppError:

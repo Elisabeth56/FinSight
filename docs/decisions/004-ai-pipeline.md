@@ -14,6 +14,8 @@ Three AI features: categorization at upload, chat, and the savings report. The c
 
 Groq free tier limits: about 30 requests and 12k tokens per minute and 1,000 requests a day on `llama-3.3-70b-versatile`; 14,400 requests a day on `llama-3.1-8b-instant`.
 
+Update (2026-10-07): Groq has since retired both Llama models. The defaults are now `openai/gpt-oss-120b` (large) and `openai/gpt-oss-20b` (small), at 1,000 requests a day and 8,000 tokens a minute each on the free tier. Both reason before answering, so requests set `reasoning_effort: low`. The README has the eval comparison.
+
 ## Options
 
 **Framework**

@@ -4,7 +4,7 @@ Two Vercel projects build from this repo on every push, both in `fra1` (Frankfur
 
 | Project | Root directory | Production URL |
 |---|---|---|
-| `finsight` | `apps/web` | https://finsight-elisabeth-nnamanis-projects.vercel.app |
+| `finsight` | `apps/web` | https://finsight-red-two.vercel.app (also https://finsight-elisabeth-nnamanis-projects.vercel.app) |
 | `finsight-api` | `apps/api` | https://finsight-api-elisabeth-nnamanis-projects.vercel.app |
 
 ## How the two find each other
@@ -44,4 +44,4 @@ pnpm db:migrate && pnpm db:seed
 
 ## Neon Auth domains
 
-Neon Auth refuses sign-ins from origins it doesn't trust. Add the production URL and the preview pattern under **Auth → Domains** in the Neon console. Localhost is trusted by default.
+Neon Auth refuses sign-ins from origins it doesn't trust. Every address people use to reach the web app must be listed under **Auth → Domains** in the Neon console: both production addresses above, plus any preview you sign in on. Localhost is trusted by default.

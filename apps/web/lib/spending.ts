@@ -28,3 +28,19 @@ export function shareLabel(part: number, whole: number): string {
   if (share > 0.22 && share < 0.28) return "a quarter";
   return `${Math.round(share * 100)}%`;
 }
+
+/** The twelve categories the API sorts into; mirrors the CHECK constraint in the schema. */
+export const CATEGORIES = [
+  "Food & Dining",
+  "Groceries",
+  "Transport",
+  "Shopping",
+  "Entertainment",
+  "Bills & Utilities",
+  "Health",
+  "Travel",
+  "Education",
+  "Transfers",
+  "Income",
+  "Other",
+];

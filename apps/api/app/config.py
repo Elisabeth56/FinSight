@@ -40,6 +40,11 @@ class Settings(BaseSettings):
         return self.env == "production"
 
     @property
+    def app_url(self) -> str:
+        """Where the web app lives; Paystack sends people back here after paying."""
+        return self.frontend_origin.split(",")[0].strip().rstrip("/")
+
+    @property
     def cors_origins(self) -> list[str]:
         origins = {o.strip() for o in self.frontend_origin.split(",") if o.strip()}
         if self.env == "development":

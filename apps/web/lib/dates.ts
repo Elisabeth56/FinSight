@@ -32,3 +32,11 @@ export function greeting(now = new Date()): string {
   if (hour < 17) return "Good afternoon";
   return "Good evening";
 }
+
+/** "2026-03-01".."2026-03-31" → "1 to 31 Mar 2026"; across months → "4 Jan to 28 Mar 2026". */
+export function dayRange(start: string, end: string): string {
+  const year = end.slice(0, 4);
+  if (start.slice(0, 7) === end.slice(0, 7)) return `${Number(start.slice(8, 10))} to ${dayShort(end)} ${year}`;
+  const startYear = start.slice(0, 4) === year ? "" : ` ${start.slice(0, 4)}`;
+  return `${dayShort(start)}${startYear} to ${dayShort(end)} ${year}`;
+}

@@ -19,7 +19,7 @@ const views: Record<string, View> = {
   empty_file: { title: "That file is empty", action: "choose-file" },
   already_uploaded: { title: "Already uploaded", action: "choose-file" },
   slow_down: { title: "One moment", action: "wait" },
-  ai_busy: { title: "The AI is busy right now", action: "wait" },
+  ai_busy: { title: "Too many questions at once", action: "wait" },
 };
 
 /** Title and action for an API error; unknown codes get a calm retry. */

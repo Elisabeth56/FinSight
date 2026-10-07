@@ -93,3 +93,14 @@ def test_someone_elses_payment_reference_is_not_found(fake_paystack):
     ref = client_for(owner).post("/payments", json={"plan_id": "pro_month"}).json()["reference"]
     res = client_for(other).post(f"/payments/{ref}/verify")
     assert res.status_code == 404
+
+
+def test_paystack_sends_people_back_to_the_billing_page(monkeypatch):
+    monkeypatch.setattr(settings, "paystack_secret_key", "sk_test")
+    monkeypatch.setattr(settings, "frontend_origin", "https://finsight.app, https://preview.app")
+    seen: dict = {}
+    monkeypatch.setattr(paystack, "initialize", lambda **kw: seen.update(kw) or "https://pay.test")
+
+    client = client_for(make_user("returner"))
+    assert client.post("/payments", json={"plan_id": "pro_year"}).status_code == 201
+    assert seen["callback_url"] == "https://finsight.app/dashboard/billing"

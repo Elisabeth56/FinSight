@@ -15,6 +15,8 @@ const LOOP_STEPS = 15;
 const STEP_MS = 600;
 const MARCH_SPENT = 284_500;
 const ease = [0.22, 1, 0.36, 1] as const;
+// smaller on phones so the photo makes it into the first screen
+const heroButton = "sm:h-13 sm:px-6 sm:text-base";
 
 /**
  * The photo hero. On loop: rows sort one by one, the Jumia charge gets highlighted, the
@@ -45,8 +47,8 @@ export function Hero() {
   const sorted = shown >= 7;
 
   return (
-    <section className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-14 px-6 pt-12 pb-28">
-      <div className="flex flex-[1_1_400px] flex-col gap-7">
+    <section className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-8 px-4 pt-4 pb-20 sm:gap-14 sm:px-6 sm:pt-12 sm:pb-28">
+      <div className="flex flex-[1_1_400px] flex-col gap-5 sm:gap-7">
         <span className="inline-flex h-8 items-center gap-2.5 self-start rounded-full bg-surface pr-3.5 pl-2.5 text-[13px] text-ink-2">
           <span className="size-2 animate-pulse-dot rounded-full bg-highlight" />
           Built for OPay and Nigerian bank statements
@@ -57,19 +59,19 @@ export function Hero() {
             <span className="font-figure tracking-[-0.01em] italic">read properly.</span>
           </Highlight>
         </h1>
-        <p className="max-w-[460px] text-lg leading-relaxed text-ink-2">
+        <p className="max-w-[460px] text-base leading-relaxed sm:text-lg text-ink-2">
           Drop in the PDF or CSV your bank already gives you. FinSight sorts every line, flags
           what looks off, and answers questions with the exact figures.
         </p>
         <div className="flex flex-wrap gap-3">
-          <LinkButton href={links.demo} size="lg">
+          <LinkButton href={links.demo} className={heroButton}>
             Try the demo <Arrow />
           </LinkButton>
-          <LinkButton href={links.signUp} size="lg" variant="secondary">
+          <LinkButton href={links.signUp} variant="secondary" className={heroButton}>
             Upload a statement
           </LinkButton>
         </div>
-        <p className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-ink-3">
+        <p className="hidden flex-wrap gap-x-5 gap-y-2 text-[13px] text-ink-3 sm:flex">
           <span>No bank login</span>
           <span aria-hidden>·</span>
           <span>PDF or CSV</span>
@@ -78,7 +80,7 @@ export function Hero() {
         </p>
       </div>
 
-      <figure className="relative m-0 h-[560px] min-w-0 flex-[1.15_1_480px] overflow-hidden rounded-[32px] bg-sunk sm:h-[660px]">
+      <figure className="relative m-0 h-[520px] min-w-0 flex-[1.15_1_480px] overflow-hidden rounded-[32px] bg-sunk sm:h-[660px]">
         <motion.div
           className="absolute inset-0"
           initial={{ scale: reduce ? 1 : 1.06 }}
@@ -119,7 +121,7 @@ export function Hero() {
           </span>
         </motion.div>
 
-        <figcaption className="absolute inset-x-5 bottom-5 flex flex-col gap-0.5 rounded-3xl bg-[#faf9f7]/96 p-3.5 text-[#292826] shadow-card">
+        <figcaption className="absolute inset-x-3 bottom-3 flex sm:inset-x-5 sm:bottom-5 flex-col gap-0.5 rounded-3xl bg-[#faf9f7]/96 p-3.5 text-[#292826] shadow-card">
           <div className="flex items-center justify-between px-2 pt-0.5 pb-2 text-xs text-[#6b6966]">
             <span>opay_statement_march.pdf</span>
             <span className="inline-flex items-center gap-1.5">
@@ -138,9 +140,9 @@ export function Hero() {
                   animate={{ scaleX: flagged ? 1 : 0 }}
                   transition={{ duration: 0.7, ease }}
                 />
-                <span className="relative w-11 shrink-0 text-xs text-[#6b6966]">{row.date}</span>
+                <span className="relative hidden w-11 shrink-0 text-xs sm:block text-[#6b6966]">{row.date}</span>
                 <span className="relative min-w-0 flex-1 truncate text-sm">{row.desc}</span>
-                <span className="relative h-6 w-[120px] shrink-0">
+                <span className="relative h-6 w-[76px] shrink-0 sm:w-[120px]">
                   <span
                     className={clsx(
                       "absolute top-0 right-0 h-6 w-[72px] rounded-full bg-[#e8e6e2] transition-opacity",
@@ -155,12 +157,18 @@ export function Hero() {
                     animate={{ opacity: done ? 1 : 0, y: done ? 0 : 6, scale: done ? 1 : 0.9 }}
                     transition={{ duration: 0.5, ease }}
                   >
-                    {flagged ? "Unusual · 3× usual" : row.cat}
+                    {flagged ? (
+                      <>
+                        Unusual<span className="hidden sm:inline">&nbsp;· 3× usual</span>
+                      </>
+                    ) : (
+                      row.cat
+                    )}
                   </motion.span>
                 </span>
                 <span
                   className={clsx(
-                    "relative w-[84px] shrink-0 text-right text-sm tabular-nums",
+                    "relative w-[72px] shrink-0 text-right sm:w-[84px] text-sm tabular-nums",
                     row.amt.startsWith("+") && "text-[#2f6b4f]",
                   )}
                 >

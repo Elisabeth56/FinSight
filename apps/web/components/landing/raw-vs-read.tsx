@@ -93,7 +93,7 @@ export function RawVsRead() {
 
         <div
           className={clsx(
-            "relative flex min-w-0 flex-[1.2_1_480px] flex-col gap-1 overflow-hidden rounded-[28px] p-4 pt-14 transition-colors duration-400",
+            "relative flex min-w-0 flex-[1.2_1_480px] flex-col gap-1 overflow-hidden rounded-[28px] p-2.5 pt-14 sm:p-4 sm:pt-14 transition-colors duration-400",
             raw ? "bg-sunk/70" : "bg-paper",
           )}
         >
@@ -119,7 +119,7 @@ export function RawVsRead() {
             <div
               key={line.raw}
               className={clsx(
-                "flex min-h-16 items-center gap-3.5 rounded-2xl px-3.5 py-2.5 transition-colors duration-400",
+                "flex min-h-16 items-center gap-3 rounded-2xl px-3 py-2.5 sm:gap-3.5 sm:px-3.5 transition-colors duration-400",
                 raw ? "bg-transparent" : line.flag ? "bg-highlight-soft" : "bg-surface",
               )}
             >
@@ -131,7 +131,7 @@ export function RawVsRead() {
               </div>
               <motion.span
                 className={clsx(
-                  "inline-flex h-6.5 shrink-0 items-center rounded-full px-3 text-xs text-[#292826]",
+                  "hidden h-6.5 shrink-0 items-center sm:inline-flex rounded-full px-3 text-xs text-[#292826]",
                   line.flag ? "bg-highlight" : "bg-sunk text-ink",
                 )}
                 animate={{ opacity: raw ? 0 : 1, scale: raw ? 0.85 : 1 }}
@@ -141,7 +141,7 @@ export function RawVsRead() {
               </motion.span>
               <span
                 className={clsx(
-                  "w-24 shrink-0 text-right text-sm tabular-nums",
+                  "w-[88px] shrink-0 text-right text-sm sm:w-24 tabular-nums",
                   raw ? "font-mono text-ink-3" : "text-ink",
                 )}
               >

@@ -43,7 +43,7 @@ jobs:
           POSTGRES_DB: finsight_test
         ports: ["5432:5432"]
         options: >-
-          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       TEST_DATABASE_URL: postgresql://postgres@localhost:5432/finsight_test
     steps:
@@ -55,7 +55,8 @@ jobs:
       - run: uv sync --frozen
       - run: uv run ruff check . ../../evals
       - run: uv run ruff format --check . ../../evals
-      - run: uv run pyright . ../../evals
+      - run: uv run pyright
+      - run: uv run pyright ../../evals
       - run: uv run pytest -q
       # no AI keys in CI, so this runs the parsing suite only
       - run: uv run python ../../evals/run.py --ci

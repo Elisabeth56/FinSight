@@ -53,9 +53,11 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --frozen
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run pyright
+      - run: uv run ruff check . ../../evals
+      - run: uv run ruff format --check . ../../evals
+      - run: uv run pyright . ../../evals
       - run: uv run pytest -q
+      # no AI keys in CI, so this runs the parsing suite only
+      - run: uv run python ../../evals/run.py --ci
       # the web app's schema copy must match the API, or `pnpm api:types` wasn't run
       - run: uv run python -m scripts.openapi > /tmp/openapi.json && diff -u ../web/types/openapi.json /tmp/openapi.json

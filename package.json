@@ -10,6 +10,7 @@
     "build": "pnpm --filter web build",
     "db:migrate": "pnpm --filter api db:migrate",
     "db:seed": "pnpm --filter api db:seed",
-    "api:types": "pnpm --filter web api:types"
+    "api:types": "pnpm --filter web api:types",
+    "eval": "pnpm --filter api eval"
   }
 }

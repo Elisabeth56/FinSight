@@ -8,6 +8,7 @@
     "test": "uv run pytest -q",
     "db:migrate": "uv run python -m scripts.db migrate",
     "db:seed": "uv run python -m scripts.db seed",
-    "openapi": "uv run python -m scripts.openapi"
+    "openapi": "uv run python -m scripts.openapi",
+    "eval": "uv run python ../../evals/run.py"
   }
 }

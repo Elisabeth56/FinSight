@@ -1,0 +1,102 @@
+{"description": "POS/SHOPRITE IKEJA CITY MALL/LA", "amount": -18450, "category": "Groceries", "merchant_has": "shoprite"}
+{"description": "POS PURCHASE SPAR LEKKI PH1", "amount": -12300, "category": "Groceries", "merchant_has": "spar"}
+{"description": "POS/EBEANO SUPERMKT/LEKKI/0921", "amount": -23100, "category": "Groceries", "merchant_has": "ebeano"}
+{"description": "POS/JUSTRITE SUPERSTORE/OGBA", "amount": -9800, "category": "Groceries", "merchant_has": "justrite"}
+{"description": "POS/PRINCE EBEANO/GWARINPA/ABJ", "amount": -15600, "category": "Groceries", "merchant_has": "ebeano"}
+{"description": "POS/MARKET SQUARE/PH/RIVERS", "amount": -11200, "category": "Groceries", "merchant_has": "market square"}
+{"description": "POS/FOODCO/IBADAN/OYO", "amount": -7400, "category": "Groceries", "merchant_has": "foodco"}
+{"description": "POS/HUBMART/IKOYI/LA", "amount": -21000, "category": "Groceries", "merchant_has": "hubmart"}
+{"description": "WEB/CHOWDECK ORDER 55120", "amount": -8750, "category": "Food & Dining", "merchant_has": "chowdeck"}
+{"description": "WEB/GLOVO*ORDER 7781NG", "amount": -6400, "category": "Food & Dining", "merchant_has": "glovo"}
+{"description": "POS/CHICKEN REP/IKEJA", "amount": -6200, "category": "Food & Dining", "merchant_has": "chicken republic"}
+{"description": "POS/KFC ADMIRALTY/LEKKI", "amount": -9100, "category": "Food & Dining", "merchant_has": "kfc"}
+{"description": "POS/DOMINOS PIZZA/YABA", "amount": -12500, "category": "Food & Dining", "merchant_has": "domino"}
+{"description": "POS/CAFE NEO/VI/2203", "amount": -5000, "category": "Food & Dining", "merchant_has": "cafe neo"}
+{"description": "POS/COLD STONE CREAMERY/IKEJA", "amount": -4800, "category": "Food & Dining", "merchant_has": "cold stone"}
+{"description": "POS/MR BIGGS/SURULERE", "amount": -3600, "category": "Food & Dining", "merchant_has": "mr biggs"}
+{"description": "WEB/JUMIA FOOD/ORDER 2210", "amount": -7200, "category": "Food & Dining", "merchant_has": "jumia food"}
+{"description": "POS/THE PLACE RESTAURANT/LEKKI", "amount": -14300, "category": "Food & Dining", "merchant_has": "the place"}
+{"description": "POS/KILIMANJARO/ABUJA", "amount": -5500, "category": "Food & Dining", "merchant_has": "kilimanjaro"}
+{"description": "POS/BUKKA HUT/VI", "amount": -8900, "category": "Food & Dining", "merchant_has": "bukka hut"}
+{"description": "WEB/BOLT.EU/O/2603020812", "amount": -3800, "category": "Transport", "merchant_has": "bolt"}
+{"description": "WEB/UBER *TRIP 8HD72", "amount": -5200, "category": "Transport", "merchant_has": "uber"}
+{"description": "WEB/INDRIVE RIDE LAGOS", "amount": -2900, "category": "Transport", "merchant_has": "indrive"}
+{"description": "POS/TOTAL ENERGIES/LEKKI/FUEL", "amount": -25000, "category": "Transport", "merchant_has": "total"}
+{"description": "POS/NNPC RETAIL/IKORODU RD", "amount": -30000, "category": "Transport", "merchant_has": "nnpc"}
+{"description": "POS/MOBIL FILLING STN/AJAH", "amount": -18000, "category": "Transport", "merchant_has": "mobil"}
+{"description": "WEB/LCC TOLL LEKKI/TAG TOPUP", "amount": -5000, "category": "Transport", "merchant_has": "lcc"}
+{"description": "USSD/COWRY CARD TOPUP/BRT", "amount": -3000, "category": "Transport", "merchant_has": "cowry"}
+{"description": "WEB/LAGRIDE TRIP 00921", "amount": -4100, "category": "Transport", "merchant_has": "lagride"}
+{"description": "POS/GIGM MOTORS/JIBOWU", "amount": -16500, "category": "Transport", "merchant_has": "gig"}
+{"description": "USSD/AIRTIME/MTN/0803XXX1123", "amount": -2000, "category": "Bills & Utilities", "merchant_has": "mtn"}
+{"description": "WEB/GLO DATA BUNDLE 0805XXX", "amount": -3500, "category": "Bills & Utilities", "merchant_has": "glo"}
+{"description": "USSD/AIRTEL DATA/0802XXX4410", "amount": -2500, "category": "Bills & Utilities", "merchant_has": "airtel"}
+{"description": "WEB/IKEJA ELECTRIC PREPAID", "amount": -15000, "category": "Bills & Utilities", "merchant_has": "ikeja electric"}
+{"description": "WEB/EKEDC PREPAID TOKEN 0412", "amount": -20000, "category": "Bills & Utilities", "merchant_has": "ekedc"}
+{"description": "WEB/DSTV SUBSCRIPTION", "amount": -12500, "category": "Bills & Utilities", "merchant_has": "dstv"}
+{"description": "WEB/GOTV MAX RENEWAL", "amount": -7200, "category": "Bills & Utilities", "merchant_has": "gotv"}
+{"description": "WEB/SPECTRANET RENEWAL 4G", "amount": -16000, "category": "Bills & Utilities", "merchant_has": "spectranet"}
+{"description": "WEB/LAWMA WASTE BILL Q1", "amount": -6000, "category": "Bills & Utilities", "merchant_has": "lawma"}
+{"description": "WEB/9MOBILE DATA 0809XXX", "amount": -1500, "category": "Bills & Utilities", "merchant_has": "9mobile"}
+{"description": "WEB/AEDC POSTPAID BILL ABJ", "amount": -11000, "category": "Bills & Utilities", "merchant_has": "aedc"}
+{"description": "WEB/STARLINK NG MONTHLY", "amount": -38000, "category": "Bills & Utilities", "merchant_has": "starlink"}
+{"description": "WEB/JMIA*ORDER 88213/NG", "amount": -45000, "category": "Shopping", "merchant_has": "jumia"}
+{"description": "WEB/KONGA ONLINE/ORDER 4410", "amount": -27500, "category": "Shopping", "merchant_has": "konga"}
+{"description": "WEB/TEMU.COM NG", "amount": -18900, "category": "Shopping", "merchant_has": "temu"}
+{"description": "POS/SLOT SYSTEMS/IKEJA", "amount": -95000, "category": "Shopping", "merchant_has": "slot"}
+{"description": "POS/H&M PALMS MALL/LEKKI", "amount": -32000, "category": "Shopping", "merchant_has": "h&m"}
+{"description": "POS/MINISO/IKEJA CITY MALL", "amount": -8600, "category": "Shopping", "merchant_has": "miniso"}
+{"description": "POS/BALOGUN MKT FABRICS/LAGOS", "amount": -22000, "category": "Shopping", "merchant_has": "balogun"}
+{"description": "WEB/ALIEXPRESS ORDER 88120", "amount": -14000, "category": "Shopping", "merchant_has": "aliexpress"}
+{"description": "WEB/NETFLIX.COM", "amount": -7000, "category": "Bills & Utilities", "merchant_has": "netflix"}
+{"description": "WEB/SPOTIFY P1C2D3", "amount": -1600, "category": "Bills & Utilities", "merchant_has": "spotify"}
+{"description": "WEB/SHOWMAX MONTHLY", "amount": -2900, "category": "Bills & Utilities", "merchant_has": "showmax"}
+{"description": "POS/FILMHOUSE IMAX/LEKKI", "amount": -6000, "category": "Entertainment", "merchant_has": "filmhouse"}
+{"description": "POS/GENESIS CINEMAS/MARYLAND", "amount": -4500, "category": "Entertainment", "merchant_has": "genesis"}
+{"description": "POS/HARD ROCK CAFE LAGOS EVENT", "amount": -15000, "category": "Entertainment", "merchant_has": "hard rock"}
+{"description": "WEB/TIX AFRICA*DETTY DEC", "amount": -25000, "category": "Entertainment", "merchant_has": "tix"}
+{"description": "POS/HEALTHPLUS PHARM/LEKKI", "amount": -6800, "category": "Health", "merchant_has": "healthplus"}
+{"description": "POS/MEDPLUS PHARMACY/IKEJA", "amount": -4300, "category": "Health", "merchant_has": "medplus"}
+{"description": "POS/REDDINGTON HOSPITAL/VI", "amount": -35000, "category": "Health", "merchant_has": "reddington"}
+{"description": "WEB/HYGEIA HMO PREMIUM", "amount": -18000, "category": "Health", "merchant_has": "hygeia"}
+{"description": "POS/EVERCARE HOSPITAL/LEKKI", "amount": -42000, "category": "Health", "merchant_has": "evercare"}
+{"description": "POS/I-FITNESS/OGUDU", "amount": -15000, "category": "Health", "merchant_has": "i-fitness"}
+{"description": "POS/ALPHA PHARMACY/SURULERE", "amount": -2700, "category": "Health", "merchant_has": "alpha"}
+{"description": "WEB/AIR PEACE BOOKING LOS-ABV", "amount": -98000, "category": "Travel", "merchant_has": "air peace"}
+{"description": "WEB/IBOM AIR*PNR X7KQ2", "amount": -86000, "category": "Travel", "merchant_has": "ibom air"}
+{"description": "WEB/BOOKING.COM HOTEL", "amount": -64000, "category": "Travel", "merchant_has": "booking"}
+{"description": "POS/EKO HOTEL & SUITES/VI", "amount": -120000, "category": "Travel", "merchant_has": "eko hotel"}
+{"description": "WEB/AIRBNB * HM2KT9", "amount": -75000, "category": "Travel", "merchant_has": "airbnb"}
+{"description": "WEB/VFS GLOBAL VISA FEE", "amount": -55000, "category": "Travel", "merchant_has": "vfs"}
+{"description": "WEB/SCHOOL FEES/GREENSPRINGS", "amount": -450000, "category": "Education", "merchant_has": "greensprings"}
+{"description": "WEB/UDEMY*COURSE", "amount": -9900, "category": "Education", "merchant_has": "udemy"}
+{"description": "WEB/COURSERA SUBSCRIPTION", "amount": -28000, "category": "Education", "merchant_has": "coursera"}
+{"description": "WEB/WAEC RESULT CHECKER", "amount": -3500, "category": "Education", "merchant_has": "waec"}
+{"description": "WEB/JAMB EPIN UTME 2026", "amount": -6200, "category": "Education", "merchant_has": "jamb"}
+{"description": "POS/ROVINGHEIGHTS BOOKS/VI", "amount": -11500, "category": "Education", "merchant_has": "roving"}
+{"description": "TRF/NIP/FBN/OKONKWO C/09203941", "amount": -20000, "category": "Transfers", "merchant_has": "okonkwo"}
+{"description": "TRF/NIP/GTB/ADEYEMI T/00491", "amount": -15000, "category": "Transfers", "merchant_has": "adeyemi"}
+{"description": "TRF/NIP/UBA/BELLO AMINAT/2201", "amount": -50000, "category": "Transfers", "merchant_has": "bello"}
+{"description": "TRANSFER TO MUSA IBRAHIM", "amount": -8000, "category": "Transfers", "merchant_has": "musa"}
+{"description": "TRF/OPAY/EZE CHIOMA/7781", "amount": -12000, "category": "Transfers", "merchant_has": "eze"}
+{"description": "TRF/NIP/ACCESS/NWOSU KELECHI", "amount": -30000, "category": "Transfers", "merchant_has": "nwosu"}
+{"description": "SAL/MAR26/TECHNEST LTD/PAY", "amount": 350000, "category": "Income", "merchant_has": "technest"}
+{"description": "SALARY CREDIT ANDELA NG", "amount": 820000, "category": "Income", "merchant_has": "andela"}
+{"description": "TRF/NIP/UBA/KEMI A/33019822", "amount": 15000, "category": "Income", "merchant_has": "kemi"}
+{"description": "TRANSFER FROM ADAEZE O.", "amount": 45000, "category": "Income", "merchant_has": "adaeze"}
+{"description": "REFUND/JUMIA ORDER 88213", "amount": 45000, "category": "Income", "merchant_has": "jumia"}
+{"description": "UPWORK ESCROW PAYOUT", "amount": 210000, "category": "Income", "merchant_has": "upwork"}
+{"description": "INTEREST CREDIT/SAVINGS", "amount": 1250, "category": "Income", "merchant_has": "interest"}
+{"description": "PAYSTACK SETTLEMENT/SHOP", "amount": 64000, "category": "Income", "merchant_has": "paystack"}
+{"description": "CHG/SMS ALERT/Q1 2026", "amount": -300, "category": "Other", "merchant_has": "sms"}
+{"description": "STAMP DUTY CHARGE", "amount": -50, "category": "Other", "merchant_has": "stamp duty"}
+{"description": "VAT ON NIP TRANSFER FEE", "amount": -4, "category": "Other", "merchant_has": "vat"}
+{"description": "NIP TRANSFER FEE", "amount": -54, "category": "Other", "merchant_has": "fee"}
+{"description": "CARD MAINTENANCE FEE", "amount": -100, "category": "Other", "merchant_has": "card"}
+{"description": "ATM WDL/ACCESS BANK/YABA", "amount": -20000, "category": "Other", "merchant_has": "atm"}
+{"description": "POS WDL/AGENT/IKORODU", "amount": -10000, "category": "Other", "merchant_has": "pos"}
+{"description": "REVERSAL CHARGE 2203", "amount": -25, "category": "Other", "merchant_has": "reversal"}
+{"description": "POS/LEKKI LEISURE LAKE/AJAH", "amount": -10000, "category": "Entertainment", "merchant_has": "leisure lake"}
+{"description": "POS/ESCAPE ROOM LAGOS/VI", "amount": -18000, "category": "Entertainment", "merchant_has": "escape room"}
+{"description": "POS/RUFUS & BEE/ONIRU", "amount": -12000, "category": "Entertainment", "merchant_has": "rufus"}
+{"description": "WEB/APPLE.COM/BILL ICLOUD", "amount": -1900, "category": "Bills & Utilities", "merchant_has": "icloud"}

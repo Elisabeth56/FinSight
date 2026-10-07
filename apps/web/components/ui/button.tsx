@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-type Variant = "primary" | "secondary" | "quiet" | "highlight";
+type Variant = "primary" | "secondary" | "quiet" | "highlight" | "action";
 type Size = "md" | "lg";
 
 const variants: Record<Variant, string> = {
@@ -10,6 +10,7 @@ const variants: Record<Variant, string> = {
   secondary: "bg-surface text-ink hover:bg-sunk",
   quiet: "bg-sunk text-ink hover:bg-surface",
   highlight: "bg-highlight text-[#292826] hover:-translate-y-0.5",
+  action: "bg-action font-semibold text-on-action hover:-translate-y-0.5",
 };
 
 const sizes: Record<Size, string> = {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { money } from "@/lib/money";
+import { money, moneyShort } from "@/lib/money";
 
 describe("money", () => {
   it("formats kobo as whole naira", () => {
@@ -19,5 +19,14 @@ describe("money", () => {
   it("uses the currency symbol it knows and the code otherwise", () => {
     expect(money(500, "USD")).toBe("$5");
     expect(money(500, "KES")).toBe("KES 5");
+  });
+});
+
+describe("moneyShort", () => {
+  it("rounds to thousands and millions for chart labels", () => {
+    expect(moneyShort(28_450_000)).toBe("₦285k");
+    expect(moneyShort(123_000_000)).toBe("₦1.2m");
+    expect(moneyShort(200_000_000)).toBe("₦2m");
+    expect(moneyShort(50_000, "USD")).toBe("$500");
   });
 });

@@ -1,5 +1,5 @@
 {"question": "How much did I spend in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent"}
-{"question": "How much did I spend last month?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent"}
+{"question": "How much did I spend last month?", "expect": "figure", "start": "2026-02-01", "end": "2026-02-28", "measure": "spent"}
 {"question": "How much did I spend on Bolt in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "bolt"}
 {"question": "How much did I spend on Bolt in the last 3 months?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "spent", "name": "bolt"}
 {"question": "How much did I spend on food in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Food & Dining"}

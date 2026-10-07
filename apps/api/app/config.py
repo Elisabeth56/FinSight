@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     groq_model_large: str = "llama-3.3-70b-versatile"
     groq_model_small: str = "llama-3.1-8b-instant"
     gemini_api_key: str = ""
-    gemini_model_large: str = "gemini-3.5-flash"
+    # flash-lite for both: gemini-3.5-flash's free tier allows 20 requests a day (Oct 2026),
+    # and flash-lite scored the same on the chat eval
+    gemini_model_large: str = "gemini-3.5-flash-lite"
     gemini_model_small: str = "gemini-3.5-flash-lite"
 
     paystack_secret_key: str = ""

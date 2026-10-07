@@ -2,10 +2,12 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { UploadProvider } from "@/components/app/upload-provider";
 import { Logo, LogoMark } from "@/components/ui/logo";
+import { authClient } from "@/lib/auth/client";
+import { forgetAccessToken } from "@/lib/auth/token";
 import type { Me } from "@/lib/models";
 import { useApi } from "@/lib/use-api";
 
@@ -50,6 +52,7 @@ function Sidebar({ pathname }: { pathname: string }) {
         <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
       ))}
       <PlanCard />
+      <SignOut className="mt-auto self-start px-3" />
     </nav>
   );
 }
@@ -102,13 +105,32 @@ function MobileHeader() {
       <Link href="/dashboard" aria-label="FinSight overview">
         <LogoMark size={30} />
       </Link>
-      <Link
-        href="/dashboard/upload"
-        className="inline-flex h-11 items-center rounded-full bg-action px-5 text-sm font-semibold text-on-action"
-      >
-        Upload
-      </Link>
+      <div className="flex items-center gap-2">
+        <SignOut className="px-3" />
+        <Link
+          href="/dashboard/upload"
+          className="inline-flex h-11 items-center rounded-full bg-action px-5 text-sm font-semibold text-on-action"
+        >
+          Upload
+        </Link>
+      </div>
     </header>
+  );
+}
+
+function SignOut({ className }: { className?: string }) {
+  const router = useRouter();
+  async function signOut() {
+    forgetAccessToken();
+    // leave either way: a failed call still leaves a session that expires on its own
+    await authClient.signOut().catch(() => null);
+    router.push("/");
+    router.refresh();
+  }
+  return (
+    <button type="button" onClick={signOut} className={clsx("h-11 rounded-full text-sm text-ink-3 hover:text-ink", className)}>
+      Sign out
+    </button>
   );
 }
 

@@ -3,13 +3,14 @@
 Usage:
     uv run python -m scripts.db migrate
     uv run python -m scripts.db seed
-Reads DATABASE_URL from the environment (or apps/api/.env).
+Reads DATABASE_URL, NEON_AUTH_BASE_URL and DEMO_PASSWORD from the environment (or apps/api/.env).
 """
 
 import os
 import sys
 from pathlib import Path
 
+import httpx
 import psycopg
 from dotenv import load_dotenv
 
@@ -18,12 +19,16 @@ from scripts.seed_data import DEMO_EMAIL, DEMO_NAME, demo_statements
 MIGRATIONS = Path(__file__).resolve().parents[3] / "db" / "migrations"
 
 
-def connect() -> psycopg.Connection:
+def env(name: str) -> str:
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        sys.exit("DATABASE_URL is not set")
-    return psycopg.connect(url)
+    value = os.environ.get(name)
+    if not value:
+        sys.exit(f"{name} is not set")
+    return value
+
+
+def connect() -> psycopg.Connection:
+    return psycopg.connect(env("DATABASE_URL"))
 
 
 def migrate() -> None:
@@ -44,9 +49,23 @@ def migrate() -> None:
             print(f"applied {path.name}")
 
 
-def seed() -> None:
-    """Replaces the demo account's data with the fixed three-month story."""
-    user_id = os.environ.get("DEMO_USER_ID", "demo-user")
+def demo_user_id() -> str:
+    """Signs in as the demo user on Neon Auth, creating it the first time, and returns its id."""
+    base = env("NEON_AUTH_BASE_URL").rstrip("/")
+    creds = {"email": DEMO_EMAIL, "password": env("DEMO_PASSWORD")}
+    # Neon Auth only accepts sign-ups from a trusted origin: the web app's
+    origin = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000").split(",")[0].strip()
+    headers = {"Origin": origin}
+    res = httpx.post(f"{base}/sign-in/email", json=creds, headers=headers, timeout=15)
+    if res.status_code == 401:
+        body = {**creds, "name": DEMO_NAME}
+        res = httpx.post(f"{base}/sign-up/email", json=body, headers=headers, timeout=15)
+    res.raise_for_status()
+    return res.json()["user"]["id"]
+
+
+def seed(user_id: str) -> None:
+    """Replaces the user's data with the demo account's fixed three-month story."""
     with connect() as conn, conn.transaction():
         conn.execute(
             "insert into profiles (id, email, full_name) values (%s, %s, %s)"
@@ -93,7 +112,7 @@ def seed() -> None:
 
 
 if __name__ == "__main__":
-    commands = {"migrate": migrate, "seed": seed}
+    commands = {"migrate": migrate, "seed": lambda: seed(demo_user_id())}
     if len(sys.argv) != 2 or sys.argv[1] not in commands:
         sys.exit("usage: python -m scripts.db [migrate|seed]")
     commands[sys.argv[1]]()

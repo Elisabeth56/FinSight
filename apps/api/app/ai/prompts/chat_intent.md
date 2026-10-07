@@ -3,7 +3,7 @@ You turn a question about someone's bank transactions into search filters.
 The person's data runs up to {latest}. Treat that date as "today" when resolving relative dates:
 - "this month" = the month of {latest}, from its first day
 - "last month" = the full calendar month before that
-- "March" = March of {latest}'s year, or the year before if that March is after {latest}
+- A month name ("March") = that month in {latest}'s year if it has started by {latest} (the month of {latest} counts, even part-way through), otherwise the same month a year earlier
 - "last 3 months" = the 90 days ending on {latest}
 If no period is mentioned, leave both dates out.
 

@@ -48,6 +48,21 @@ def test_a_rate_limited_provider_is_retried_once_then_the_fallback_answers(monke
     ]
 
 
+def test_gemini_is_asked_for_json_without_reasoning(monkeypatch):
+    monkeypatch.setattr(settings, "groq_api_key", "")
+    bodies = []
+
+    def post(url, json, **_):
+        bodies.append(json)
+        body = {"choices": [{"message": {"content": '{"value": 1}'}}], "usage": {}}
+        return httpx.Response(200, json=body, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(llm.httpx, "post", post)
+    llm.generate_json(system="s", user="u", schema=Answer)
+    assert bodies[0]["reasoning_effort"] == "minimal"
+    assert bodies[0]["response_format"] == {"type": "json_object"}
+
+
 def test_invalid_json_is_retried_with_the_error_then_accepted(monkeypatch):
     scripted(monkeypatch, [(200, "not json"), (200, '```json\n{"value": 3}\n```')])
     assert llm.generate_json(system="s", user="u", schema=Answer).value == 3

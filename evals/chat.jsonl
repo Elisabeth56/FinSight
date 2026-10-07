@@ -1,0 +1,30 @@
+{"question": "How much did I spend in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent"}
+{"question": "How much did I spend last month?", "expect": "figure", "start": "2026-02-01", "end": "2026-02-28", "measure": "spent"}
+{"question": "How much did I spend on Bolt in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "bolt"}
+{"question": "How much did I spend on Bolt in the last 3 months?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "spent", "name": "bolt"}
+{"question": "How much did I spend on food in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Food & Dining"}
+{"question": "What did transport cost me in February?", "expect": "figure", "start": "2026-02-01", "end": "2026-02-28", "measure": "spent", "category": "Transport"}
+{"question": "How much money came in during March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "received"}
+{"question": "How much was my salary from Technest in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "received", "name": "technest"}
+{"question": "How much have I paid DStv since January?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "spent", "name": "dstv"}
+{"question": "How much went on Ikeja Electric in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "ikeja electric"}
+{"question": "What did I spend on groceries from January to March?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "spent", "category": "Groceries"}
+{"question": "How much did I send to Chidi Okonkwo in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "okonkwo"}
+{"question": "How much did I spend on Chowdeck in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "chowdeck"}
+{"question": "What was my biggest single purchase in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "largest"}
+{"question": "How much did I spend on shopping in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Shopping"}
+{"question": "How much did I spend in February?", "expect": "figure", "start": "2026-02-01", "end": "2026-02-28", "measure": "spent"}
+{"question": "How much did I spend in January?", "expect": "figure", "start": "2026-01-01", "end": "2026-01-31", "measure": "spent"}
+{"question": "What did I spend on health in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Health"}
+{"question": "How much has Spotify cost me since January?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "spent", "name": "spotify"}
+{"question": "How much airtime did I buy in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "airtime"}
+{"question": "How much were my bills in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Bills & Utilities"}
+{"question": "How much came in between January and March?", "expect": "figure", "start": "2026-01-01", "end": "2026-03-31", "measure": "received"}
+{"question": "How much did I spend at Spar in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "spar"}
+{"question": "How much did I spend at Chicken Republic in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "name": "chicken rep"}
+{"question": "What did entertainment cost in March?", "expect": "figure", "start": "2026-03-01", "end": "2026-03-31", "measure": "spent", "category": "Entertainment"}
+{"question": "How much did I spend on Netflix?", "expect": "no_figure"}
+{"question": "How much did I spend in December 2025?", "expect": "no_figure"}
+{"question": "What is my credit score?", "expect": "no_figure"}
+{"question": "How much is in my savings account right now?", "expect": "no_figure"}
+{"question": "How much did I pay in school fees?", "expect": "no_figure"}

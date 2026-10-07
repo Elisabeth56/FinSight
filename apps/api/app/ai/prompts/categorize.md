@@ -7,7 +7,7 @@ For each numbered line inside <transactions>, return:
 Rules:
 - Lines marked [IN] are money received. Use "Income" for salary, refunds and transfers from other people. Use "Transfers" only when it is clearly the person's own account.
 - Lines marked [OUT] are money spent. Transfers to another person are "Transfers".
-- Airtime, data, electricity (IKEDC, EKEDC, prepaid), DStv/GOtv and app subscriptions are "Bills & Utilities".
+- Airtime, data, electricity (IKEDC, EKEDC, prepaid), DStv/GOtv and recurring subscriptions, including streaming (Netflix, Spotify, Showmax, iCloud), are "Bills & Utilities". One-off outings (cinema, events, games) are "Entertainment".
 - Restaurants, food delivery (Chowdeck, Glovo, Jumia Food) and cafés are "Food & Dining". Supermarkets (Shoprite, Spar, Ebeano) are "Groceries".
 - Bolt, Uber, inDrive, fuel and transport fares are "Transport".
 - Bank charges, SMS alert fees and stamp duty are "Other".

@@ -38,6 +38,8 @@ class Provider:
     api_key: str
     models: dict[str, str]
     json_mode: bool
+    # provider-specific request fields
+    extra: dict
 
 
 def providers() -> list[Provider]:
@@ -49,13 +51,17 @@ def providers() -> list[Provider]:
             settings.groq_api_key,
             {"large": settings.groq_model_large, "small": settings.groq_model_small},
             json_mode=True,
+            extra={},
         ),
         Provider(
             "gemini",
             "https://generativelanguage.googleapis.com/v1beta/openai",
             settings.gemini_api_key,
             {"large": settings.gemini_model_large, "small": settings.gemini_model_small},
-            json_mode=False,
+            json_mode=True,
+            # Gemini 3.x reasons by default and counts it against max_tokens, which cut JSON
+            # answers off mid-object; these tasks don't need it
+            extra={"reasoning_effort": "minimal"},
         ),
     ]
     return [p for p in chain if p.api_key]
@@ -119,6 +125,7 @@ def _complete(
             "messages": messages,
             "temperature": temperature,
             "max_tokens": max_tokens,
+            **provider.extra,
         }
         if json_mode and provider.json_mode:
             body["response_format"] = {"type": "json_object"}
@@ -164,6 +171,7 @@ async def stream(
             "messages": messages,
             "temperature": temperature,
             "stream": True,
+            **provider.extra,
         }
         sent_any = False
         started = time.monotonic()

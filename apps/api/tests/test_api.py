@@ -2,10 +2,21 @@ from pathlib import Path
 
 import psycopg
 
-from app.features.statements import logic as statements_logic
+from app.features.statements import categorize
 from tests.conftest import TEST_DB, client_for, make_user, seed_demo
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def fake_llm(monkeypatch, category):
+    """Answers every categorize call with one category, numbered like the prompt."""
+
+    def answer(*, user, schema, **_):
+        count = sum(1 for line in user.splitlines() if line[:1].isdigit())
+        items = [{"i": n, "category": category, "merchant": f"M{n}"} for n in range(1, count + 1)]
+        return schema.model_validate({"items": items})
+
+    monkeypatch.setattr(categorize, "generate_json", answer)
 
 
 def test_requests_without_a_token_get_the_shared_error_shape():
@@ -117,9 +128,7 @@ def test_deleting_a_statement_removes_its_rows():
 
 
 def test_csv_upload_stores_rows_and_rejects_the_same_file_twice(monkeypatch):
-    monkeypatch.setattr(
-        statements_logic, "categorize_all", lambda txs: ["Groceries"] * len(list(txs))
-    )
+    fake_llm(monkeypatch, "Groceries")
     user = make_user("uploader", pro=True)
     client = client_for(user)
     csv = (FIXTURES / "gtbank_march.csv").read_bytes()
@@ -140,7 +149,7 @@ def test_csv_upload_stores_rows_and_rejects_the_same_file_twice(monkeypatch):
 
 
 def test_free_plan_gets_one_upload_a_month(monkeypatch):
-    monkeypatch.setattr(statements_logic, "categorize_all", lambda txs: ["Other"] * len(list(txs)))
+    fake_llm(monkeypatch, "Other")
     client = client_for(make_user("free"))
     csv = (FIXTURES / "gtbank_march.csv").read_bytes()
 

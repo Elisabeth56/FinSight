@@ -22,8 +22,13 @@ class Settings(BaseSettings):
     auth_jwks_url: str = ""
     auth_audience: str = ""
 
+    # LLM providers in fallback order; check free-tier models before changing these
     groq_api_key: str = ""
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model_large: str = "llama-3.3-70b-versatile"
+    groq_model_small: str = "llama-3.1-8b-instant"
+    gemini_api_key: str = ""
+    gemini_model_large: str = "gemini-3.5-flash"
+    gemini_model_small: str = "gemini-3.5-flash-lite"
 
     paystack_secret_key: str = ""
 

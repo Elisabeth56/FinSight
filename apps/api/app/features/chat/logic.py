@@ -1,81 +1,95 @@
+"""Chat over the user's own transactions.
+
+1. A small model turns the question into filters (dates, category, merchant, direction).
+2. SQL computes the exact totals and fetches the matching rows.
+3. The large model writes the answer from those numbers and is told not to do any maths.
+No vector store: for transactions, exact filters beat similarity search and cost nothing.
 """
-Chat service — RAG over the user's own transactions.
-
-Retrieval strategy: we don't use a vector store. For transaction data,
-exact filters (date range, category, keyword) give better answers than
-semantic similarity and cost nothing. We ask the LLM to extract filter
-intent, then run targeted SQL against Supabase, then stream a natural-
-language answer with the retrieved rows as context.
-
-Two LLM calls per user message:
-1. Intent extraction (JSON, non-streaming, fast)
-2. Answer generation (streaming)
-"""
-
-from __future__ import annotations
 
 import asyncio
-import logging
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 from datetime import date
+from typing import Literal
 
 from psycopg import sql
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.db import connect
+from app.ai.llm import fenced, generate_json, load_prompt, stream
+from app.db import connect, one
+from app.errors import AppError
+from app.features.statements.categorize import Category
 from app.features.statements.schemas import CATEGORIES
-from app.groq_client import chat_json, chat_stream
 
-logger = logging.getLogger(__name__)
-
-
-# ---------------------------------------------------------------------------
-# Intent extraction
-# ---------------------------------------------------------------------------
-class QueryIntent(BaseModel):
-    start_date: str | None = None  # 'YYYY-MM-DD'
-    end_date: str | None = None
-    category: str | None = None
-    keyword: str | None = None
-    limit: int = Field(default=100, ge=10, le=500)
+SYMBOLS = {"NGN": "₦", "USD": "$", "GBP": "£", "EUR": "€"}
+ROW_LIMIT = 40
 
 
-INTENT_SYSTEM = f"""Extract filter parameters from a user's question about their finances.
-
-Today is {{today}}. Return a JSON object with these optional keys:
-- "start_date": ISO date (YYYY-MM-DD) if the question is scoped to a period
-- "end_date": ISO date if scoped to a period
-- "category": one of {CATEGORIES} if the question names a category
-- "keyword": a merchant or description term to search for
-- "limit": how many rows are likely needed (default 100)
-
-Resolve relative dates:
-- "last month" → the previous full calendar month
-- "this month" → the current month to date
-- "March" → March of the current year (or previous if future)
-- "last 3 months" → 90 days back from today
-
-Return ONLY the JSON object. Omit keys you can't determine."""
+class Intent(BaseModel):
+    start_date: date | None = None
+    end_date: date | None = None
+    category: Category | None = None
+    merchant: str | None = None
+    direction: Literal["in", "out"] | None = None
 
 
-def _extract_intent(message: str) -> QueryIntent:
+@dataclass
+class Facts:
+    """What SQL found; also sent to the UI as the answer's sources."""
+
+    currency: str
+    count: int
+    total_minor: int
+    start: date | None
+    end: date | None
+    categories: list[dict]
+    merchants: list[dict]
+    rows: list[dict]
+
+    def sources(self) -> dict:
+        return {
+            "count": self.count,
+            "start": self.start.isoformat() if self.start else None,
+            "end": self.end.isoformat() if self.end else None,
+            "categories": [c["category"] for c in self.categories[:3]],
+        }
+
+
+def money(minor: int, currency: str) -> str:
+    return f"{SYMBOLS.get(currency, currency + ' ')}{abs(minor) / 100:,.0f}"
+
+
+def extract_intent(question: str, latest: date) -> Intent:
+    """Small model; if it fails, search everything rather than fail the question."""
     try:
-        raw = chat_json(
-            system=INTENT_SYSTEM.format(today=date.today().isoformat()),
-            user=message,
-            max_tokens=256,
+        return generate_json(
+            system=load_prompt("chat_intent")
+            .replace("{latest}", latest.isoformat())
+            .replace("{categories}", ", ".join(CATEGORIES)),
+            user=fenced("question", question),
+            schema=Intent,
+            size="small",
+            max_tokens=200,
+            name="chat_intent",
         )
-        return QueryIntent(**{k: v for k, v in raw.items() if v is not None})
-    except Exception as e:
-        logger.warning("Intent extraction failed, falling back to broad search: %s", e)
-        return QueryIntent()
+    except AppError:
+        return Intent()
 
 
-# ---------------------------------------------------------------------------
-# Retrieval
-# ---------------------------------------------------------------------------
-def _fetch_transactions(user_id: str, intent: QueryIntent) -> list[dict]:
-    where, params = [sql.SQL("user_id = %s")], [user_id]
+def latest_date(user_id: str) -> date | None:
+    with connect() as conn:
+        return one(
+            conn.execute(
+                "select max(transaction_date) as d from transactions where user_id = %s",
+                (user_id,),
+            ).fetchone()
+        )["d"]
+
+
+def gather(user_id: str, currency: str, intent: Intent) -> Facts:
+    """Runs the intent as SQL: exact totals, top categories and names, recent rows."""
+    where = [sql.SQL("user_id = %s"), sql.SQL("currency = %s")]
+    params: list = [user_id, currency]
     if intent.start_date:
         where.append(sql.SQL("transaction_date >= %s"))
         params.append(intent.start_date)
@@ -85,71 +99,102 @@ def _fetch_transactions(user_id: str, intent: QueryIntent) -> list[dict]:
     if intent.category:
         where.append(sql.SQL("category = %s"))
         params.append(intent.category)
-    if intent.keyword:
+    if intent.merchant:
         where.append(sql.SQL("(description ilike %s or merchant ilike %s)"))
-        params += [f"%{intent.keyword}%", f"%{intent.keyword}%"]
+        params += [f"%{intent.merchant}%"] * 2
+    if intent.direction == "out":
+        where.append(sql.SQL("amount_minor < 0"))
+    elif intent.direction == "in":
+        where.append(sql.SQL("amount_minor > 0"))
+    clause = sql.SQL(" and ").join(where)
+
     with connect() as conn:
-        query = sql.SQL(
-            "select transaction_date, description, amount_minor / 100.0 as amount, category,"
-            " is_anomaly from transactions where {} order by transaction_date desc limit %s"
-        ).format(sql.SQL(" and ").join(where))
-        return conn.execute(
-            query,
-            (*params, intent.limit),
+        totals = one(
+            conn.execute(
+                sql.SQL(
+                    "select count(*) as n, coalesce(sum(amount_minor), 0) as total,"
+                    " min(transaction_date) as first, max(transaction_date) as last"
+                    " from transactions where {}"
+                ).format(clause),
+                params,
+            ).fetchone()
+        )
+        categories = conn.execute(
+            sql.SQL(
+                "select category, sum(amount_minor) as total, count(*) as n from transactions"
+                " where {} group by category order by abs(sum(amount_minor)) desc"
+            ).format(clause),
+            params,
+        ).fetchall()
+        merchants = conn.execute(
+            sql.SQL(
+                "select coalesce(merchant, description) as name, sum(amount_minor) as total,"
+                " count(*) as n from transactions where {} group by 1"
+                " order by abs(sum(amount_minor)) desc limit 5"
+            ).format(clause),
+            params,
+        ).fetchall()
+        rows = conn.execute(
+            sql.SQL(
+                "select transaction_date, coalesce(merchant, description) as name, amount_minor,"
+                " category, is_anomaly from transactions where {}"
+                " order by transaction_date desc limit %s"
+            ).format(clause),
+            [*params, ROW_LIMIT],
         ).fetchall()
 
-
-# ---------------------------------------------------------------------------
-# Answer generation
-# ---------------------------------------------------------------------------
-ANSWER_SYSTEM = """You are FinSight, a friendly and precise personal-finance assistant.
-
-You answer questions about the user's own transactions, which are provided
-as structured data in each message. Rules:
-
-- Be concise. Lead with the direct answer, then add one or two supporting
-  details if relevant.
-- Always cite specific amounts and dates when they appear in the data.
-- If the data is empty, say so clearly and suggest uploading a statement
-  or broadening the question.
-- Format currency with the user's currency code (provided per message).
-- Never invent transactions not present in the context.
-- When summarizing spending, group by category if useful."""
+    return Facts(
+        currency=currency,
+        count=totals["n"],
+        total_minor=totals["total"],
+        start=intent.start_date or totals["first"],
+        end=intent.end_date or totals["last"],
+        categories=categories,
+        merchants=merchants,
+        rows=rows,
+    )
 
 
-def _format_context(transactions: list[dict], currency: str) -> str:
-    if not transactions:
-        return "(No matching transactions found.)"
-
-    lines = [f"Currency: {currency}", f"Found {len(transactions)} transactions:\n"]
-    for t in transactions:
-        flag = " ⚠ANOMALY" if t.get("is_anomaly") else ""
-        lines.append(
-            f"- {t['transaction_date']} | {t.get('category') or 'Uncategorized'} "
-            f"| {t['amount']} | {t['description']}{flag}"
+def describe(facts: Facts, intent: Intent) -> str:
+    """The <facts> and <rows> blocks the answer model reads. Every number here comes from SQL."""
+    if facts.count == 0:
+        return fenced("facts", "Nothing matched this question in the person's transactions.")
+    cur = facts.currency
+    kind = {"out": "spent", "in": "received"}.get(intent.direction or "", "net total")
+    by_category = "; ".join(
+        f"{c['category']} {money(c['total'], cur)} ({c['n']})" for c in facts.categories
+    )
+    by_name = "; ".join(f"{m['name']} {money(m['total'], cur)} ({m['n']})" for m in facts.merchants)
+    lines = [
+        f"Period: {facts.start} to {facts.end}",
+        f"Matching transactions: {facts.count}",
+        f"Total {kind}: {money(facts.total_minor, cur)}",
+        f"By category: {by_category}",
+        f"Top names: {by_name}",
+    ]
+    rows = "\n".join(
+        " | ".join(
+            [
+                str(r["transaction_date"]),
+                r["name"],
+                ("-" if r["amount_minor"] < 0 else "+") + money(r["amount_minor"], cur),
+                r["category"] + (" (unusual)" if r["is_anomaly"] else ""),
+            ]
         )
-    return "\n".join(lines)
+        for r in facts.rows
+    )
+    return fenced("facts", "\n".join(lines)) + "\n\n" + fenced("rows", rows)
 
 
-async def stream_chat(
-    user_id: str,
-    message: str,
-    currency: str = "USD",
-) -> AsyncIterator[str]:
-    """Full pipeline: intent → fetch → stream answer."""
-    # blocking calls run in a thread so other requests keep moving while this one waits
-    intent = await asyncio.to_thread(_extract_intent, message)
-    logger.info("Chat intent: %s", intent.model_dump(exclude_none=True))
+async def answer(user_id: str, question: str, currency: str) -> tuple[Facts, AsyncIterator[str]]:
+    """Returns the facts behind the answer and a stream of the answer's text."""
+    # blocking steps run in a thread so other requests keep moving
+    latest = await asyncio.to_thread(latest_date, user_id) or date.today()
+    intent = await asyncio.to_thread(extract_intent, question, latest)
+    facts = await asyncio.to_thread(gather, user_id, currency, intent)
 
-    transactions = await asyncio.to_thread(_fetch_transactions, user_id, intent)
-    context = _format_context(transactions, currency)
-
-    user_prompt = f"""User question: {message}
-
-Relevant transactions from their data:
-{context}
-
-Answer the question using only this data."""
-
-    async for token in chat_stream(system=ANSWER_SYSTEM, user=user_prompt):
-        yield token
+    prompt = f"{fenced('question', question)}\n\n{describe(facts, intent)}"
+    tokens = stream(
+        system=load_prompt("chat_answer"), user=prompt, size="large", name="chat_answer"
+    )
+    return facts, tokens

@@ -2,14 +2,16 @@
 
 import { createClient } from "@/lib/supabase/client";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// In production the web app rewrites /api/* to the API on the same origin, so there's no CORS.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
+/** The API's one error shape: {error: {code, message, details}}. `message` is safe to show. */
 export class ApiError extends Error {
   constructor(
     public status: number,
+    public code: string,
     message: string,
-    public body?: unknown,
+    public details: Record<string, unknown> = {},
   ) {
     super(message);
     this.name = "ApiError";
@@ -17,62 +19,49 @@ export class ApiError extends Error {
 }
 
 type Options = Omit<RequestInit, "body"> & {
-  body?: unknown;          // any JSON-serializable value
-  form?: FormData;         // for file uploads — skips JSON handling
+  body?: unknown;
+  form?: FormData;
 };
 
-/**
- * Authenticated fetch to the FastAPI backend.
- * Pulls the Supabase access token from the current session and
- * attaches it as `Authorization: Bearer <token>`.
- *
- * Usage:
- *   const me = await api<CurrentUser>("/auth/me");
- *   const res = await api("/upload", { form: formData });
- */
-export async function api<T = unknown>(
-  path: string,
-  opts: Options = {},
-): Promise<T> {
+async function authHeader(): Promise<Record<string, string>> {
   const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
+/** Authenticated request to the API. Throws ApiError with a message fit for the screen. */
+export async function api<T = unknown>(path: string, opts: Options = {}): Promise<T> {
   const headers = new Headers(opts.headers);
-  if (session?.access_token) {
-    headers.set("Authorization", `Bearer ${session.access_token}`);
-  }
+  for (const [k, v] of Object.entries(await authHeader())) headers.set(k, v);
 
   let body: BodyInit | undefined;
   if (opts.form) {
-    body = opts.form; // browser sets multipart boundary
+    body = opts.form;
   } else if (opts.body !== undefined) {
     headers.set("Content-Type", "application/json");
     body = JSON.stringify(opts.body);
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...opts,
-    headers,
-    body,
-  });
-
-  if (!res.ok) {
-    let errBody: unknown;
-    try {
-      errBody = await res.json();
-    } catch {
-      errBody = await res.text();
-    }
-    const msg =
-      (errBody as { detail?: string })?.detail ??
-      `Request failed: ${res.status}`;
-    throw new ApiError(res.status, msg, errBody);
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...opts, headers, body });
+  } catch {
+    throw new ApiError(0, "offline", "We couldn't reach FinSight. Check your connection and try again.");
   }
 
-  // Handle 204 / empty body gracefully
+  if (!res.ok) throw await toApiError(res);
   if (res.status === 204) return undefined as T;
   const text = await res.text();
   return (text ? JSON.parse(text) : undefined) as T;
+}
+
+async function toApiError(res: Response): Promise<ApiError> {
+  try {
+    const { error } = await res.json();
+    if (error?.code && error?.message) return new ApiError(res.status, error.code, error.message, error.details);
+  } catch {
+    // not our JSON shape: fall through to a generic message
+  }
+  return new ApiError(res.status, "unexpected", "Something went wrong on our side. Try again in a moment.");
 }

@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { CheckCircle2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";

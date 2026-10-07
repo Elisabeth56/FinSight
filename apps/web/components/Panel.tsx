@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Upload } from "lucide-react";
 
 /* ---------- panel: a consistent card for dashboard sections ---------- */

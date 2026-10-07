@@ -7,7 +7,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Send, Sparkles, Loader2, Square } from "lucide-react";
 
 import { streamChat } from "@/lib/stream";

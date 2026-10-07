@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-07T20:20:54+00:00",
+  "parsing": {
+    "files": [
+      {
+        "file": "gtbank_march.csv",
+        "rows_ok": true,
+        "total_ok": true,
+        "rows": 41,
+        "ms": 40
+      },
+      {
+        "file": "access_q1.csv",
+        "rows_ok": true,
+        "total_ok": true,
+        "rows": 116,
+        "ms": 14
+      },
+      {
+        "file": "opay_march.pdf",
+        "rows_ok": true,
+        "total_ok": true,
+        "rows": 41,
+        "ms": 283
+      }
+    ],
+    "accuracy": 1.0
+  },
+  "categorize": {
+    "cases": 102,
+    "accuracy": 1.0,
+    "name_hit_rate": 1.0,
+    "fallbacks": 0,
+    "seconds": 9.2,
+    "usage": {
+      "calls": 3,
+      "tokens_in": 3109,
+      "tokens_out": 2940,
+      "models": [
+        "gemini/gemini-3.5-flash-lite"
+      ]
+    },
+    "misses": []
+  },
+  "chat": {
+    "cases": 30,
+    "accuracy": 0.967,
+    "p50_ms": 2224.9,
+    "p95_ms": 3383.0,
+    "usage": {
+      "chat_intent": {
+        "calls": 30,
+        "tokens_in": 10788,
+        "tokens_out": 1504,
+        "models": [
+          "gemini/gemini-3.5-flash-lite"
+        ]
+      },
+      "chat_answer": {
+        "calls": 30,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "models": [
+          "gemini/gemini-3.5-flash-lite"
+        ]
+      }
+    },
+    "failures": [
+      {
+        "question": "How much is in my savings account right now?",
+        "ok": false,
+        "answer": "I do not have the current balance of your savings account. The available records show 4 transfer transactions totaling ₦90,000 during this period, but no account balance data is included."
+      }
+    ]
+  }
+}

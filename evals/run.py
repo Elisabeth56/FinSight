@@ -37,6 +37,8 @@ from app.features.statements.parser import parse_statement  # noqa: E402
 from app.features.statements.schemas import ParsedTransaction  # noqa: E402
 
 EVAL_USER = "eval-user"
+# free-tier AI limits are per minute; pausing keeps rate limits from scoring as wrong answers
+PAUSE_SECONDS = float(os.environ.get("EVAL_PAUSE_SECONDS", "6"))
 
 
 class Usage(logging.Handler):
@@ -205,6 +207,7 @@ def eval_chat(usage: Usage) -> dict:
     seed_eval_user()
     results, latencies = [], []
     for case in read_cases("chat.jsonl"):
+        time.sleep(PAUSE_SECONDS)
         try:
             text, seconds = asyncio.run(ask(case["question"]))
         except AppError as e:

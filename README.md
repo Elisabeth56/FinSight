@@ -66,15 +66,18 @@ More detail, including the data model and capacity maths, is in [docs/architectu
 
 ## AI quality
 
-Three golden sets in [`evals/`](evals), scored by one script (`pnpm eval`):
+Three golden sets in [`evals/`](evals), scored by one script (`pnpm eval`). Baseline from 7 October 2026, on Gemini 3.5 Flash-Lite for every call:
 
-| Suite | Cases | Metric | Latest |
+| Suite | Cases | Metric | Result |
 |---|---|---|---|
 | Parsing | GTBank CSV, Access CSV, OPay-style PDF | rows, total and currency exact | 3 / 3 files |
-| Categorization | 102 labelled Nigerian narrations | category accuracy, readable name kept | pending first run with a key |
-| Chat | 25 answerable + 5 unanswerable questions on the demo data | amount matches SQL, or no amount given | pending first run with a key |
+| Categorization | 102 labelled Nigerian narrations | category right / readable name kept | 102 / 102 · 102 / 102 |
+| Chat | 25 answerable + 5 unanswerable questions on the demo data | amount matches SQL, or no amount given | 29 / 30 |
+| Chat latency | full streamed answer | p50 / p95 | 2.2 s / 3.4 s |
 
-CI runs the parsing suite on every pull request. The categorization and chat baselines are recorded in `evals/results/baseline.json` once an AI key is configured.
+The first run found three problems, all fixed in the same change: Gemini spent its token budget on reasoning and cut JSON answers off mid-object; the intent model read "March" as March of last year when the data ended part-way through March; and streaming subscriptions landed in Entertainment instead of Bills. The one chat miss declines the question correctly but quotes an unrelated total, which the judge counts as a fail.
+
+Free-tier limits seen while running it: Gemini 3.5 Flash allows 20 requests a day on a free key, so Flash-Lite is the default for both roles. CI runs the parsing suite on every pull request; full results are in [`evals/results/baseline.json`](evals/results/baseline.json).
 
 ## Tech stack
 

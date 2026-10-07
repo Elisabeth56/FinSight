@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-07T20:20:54+00:00",
+  "at": "2026-10-07T21:31:40+00:00",
   "parsing": {
     "files": [
       {
@@ -7,53 +7,94 @@
         "rows_ok": true,
         "total_ok": true,
         "rows": 41,
-        "ms": 40
+        "ms": 31
       },
       {
         "file": "access_q1.csv",
         "rows_ok": true,
         "total_ok": true,
         "rows": 116,
-        "ms": 14
+        "ms": 11
       },
       {
         "file": "opay_march.pdf",
         "rows_ok": true,
         "total_ok": true,
         "rows": 41,
-        "ms": 283
+        "ms": 198
       }
     ],
     "accuracy": 1.0
   },
   "categorize": {
     "cases": 102,
-    "accuracy": 1.0,
-    "name_hit_rate": 1.0,
+    "accuracy": 0.922,
+    "name_hit_rate": 0.98,
     "fallbacks": 0,
-    "seconds": 9.2,
+    "seconds": 10.3,
     "usage": {
       "calls": 3,
-      "tokens_in": 3109,
-      "tokens_out": 2940,
+      "tokens_in": 3201,
+      "tokens_out": 4000,
       "models": [
-        "gemini/gemini-3.5-flash-lite"
+        "groq/openai/gpt-oss-120b"
       ]
     },
-    "misses": []
+    "misses": [
+      {
+        "description": "USSD/COWRY CARD TOPUP/BRT",
+        "expected": "Transport",
+        "got": "Other"
+      },
+      {
+        "description": "POS/SLOT SYSTEMS/IKEJA",
+        "expected": "Shopping",
+        "got": "Other"
+      },
+      {
+        "description": "POS/HARD ROCK CAFE LAGOS EVENT",
+        "expected": "Entertainment",
+        "got": "Food & Dining"
+      },
+      {
+        "description": "WEB/VFS GLOBAL VISA FEE",
+        "expected": "Travel",
+        "got": "Bills & Utilities"
+      },
+      {
+        "description": "POS/ROVINGHEIGHTS BOOKS/VI",
+        "expected": "Education",
+        "got": "Shopping"
+      },
+      {
+        "description": "TRF/NIP/UBA/KEMI A/33019822",
+        "expected": "Income",
+        "got": "Transfers"
+      },
+      {
+        "description": "TRANSFER FROM ADAEZE O.",
+        "expected": "Income",
+        "got": "Transfers"
+      },
+      {
+        "description": "POS/RUFUS & BEE/ONIRU",
+        "expected": "Entertainment",
+        "got": "Food & Dining"
+      }
+    ]
   },
   "chat": {
     "cases": 30,
     "accuracy": 0.967,
-    "p50_ms": 2224.9,
-    "p95_ms": 3383.0,
+    "p50_ms": 1690.0,
+    "p95_ms": 2378.6,
     "usage": {
       "chat_intent": {
         "calls": 30,
-        "tokens_in": 10788,
-        "tokens_out": 1504,
+        "tokens_in": 14296,
+        "tokens_out": 2197,
         "models": [
-          "gemini/gemini-3.5-flash-lite"
+          "groq/openai/gpt-oss-20b"
         ]
       },
       "chat_answer": {
@@ -61,15 +102,15 @@
         "tokens_in": 0,
         "tokens_out": 0,
         "models": [
-          "gemini/gemini-3.5-flash-lite"
+          "groq/openai/gpt-oss-120b"
         ]
       }
     },
     "failures": [
       {
-        "question": "How much is in my savings account right now?",
+        "question": "How much did I spend on Bolt in the last 3 months?",
         "ok": false,
-        "answer": "I do not have the current balance of your savings account. The available records show 4 transfer transactions totaling ₦90,000 during this period, but no account balance data is included."
+        "answer": "You spent ₦94,800 on Bolt in the last 3 months; all 27 matching transactions were for Bolt in the Transport category."
       }
     ]
   }

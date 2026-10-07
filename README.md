@@ -66,25 +66,40 @@ More detail, including the data model and capacity maths, is in [docs/architectu
 
 ## AI quality
 
-Three golden sets in [`evals/`](evals), scored by one script (`pnpm eval`). Baseline from 7 October 2026, on Gemini 3.5 Flash-Lite for every call:
+Three golden sets in [`evals/`](evals), scored by one script (`pnpm eval`). Groq is the primary provider; Gemini answers only when Groq is rate-limited or down.
 
-| Suite | Cases | Metric | Result |
-|---|---|---|---|
-| Parsing | GTBank CSV, Access CSV, OPay-style PDF | rows, total and currency exact | 3 / 3 files |
-| Categorization | 102 labelled Nigerian narrations | category right / readable name kept | 102 / 102 · 102 / 102 |
-| Chat | 25 answerable + 5 unanswerable questions on the demo data | amount matches SQL, or no amount given | 29 / 30 |
-| Chat latency | full streamed answer | p50 / p95 | 2.2 s / 3.4 s |
+| Suite | Cases | Metric | Groq (7 Oct 2026) | Gemini, earlier run |
+|---|---|---|---|---|
+| Parsing | GTBank CSV, Access CSV, OPay-style PDF | rows, total and currency exact | 3 / 3 files | 3 / 3 files |
+| Categorization | 102 labelled Nigerian narrations | category right / readable name kept | 94 / 102 · 100 / 102 | 102 / 102 · 102 / 102 |
+| Chat | 25 answerable + 5 unanswerable questions on the demo data | amount matches SQL, or no amount given | 29 / 30 | 29 / 30 |
+| Chat latency | full streamed answer | p50 / p95 | 1.7 s / 2.4 s | 2.2 s / 3.4 s |
 
-The first run found three problems, all fixed in the same change: Gemini spent its token budget on reasoning and cut JSON answers off mid-object; the intent model read "March" as March of last year when the data ended part-way through March; and streaming subscriptions landed in Entertainment instead of Bills. The one chat miss declines the question correctly but quotes an unrelated total, which the judge counts as a fail.
+Models: on Groq, `gpt-oss-120b` for categorization and answers and `gpt-oss-20b` for chat intent, both at low reasoning effort. On Gemini, 3.5 Flash-Lite for both roles.
 
-Free-tier limits seen while running it: Gemini 3.5 Flash allows 20 requests a day on a free key, so Flash-Lite is the default for both roles. CI runs the parsing suite on every pull request; full results are in [`evals/results/baseline.json`](evals/results/baseline.json).
+What the runs found:
+- **First run (Gemini).** Three problems, all fixed in the same change:
+  - Gemini spent its token budget on reasoning and cut JSON answers off mid-object.
+  - The intent model read "March" as March of last year when the data ended part-way through March.
+  - Streaming subscriptions landed in Entertainment instead of Bills.
+- **Groq rerun.**
+  - Groq had retired both Llama 3.x models, so every call failed over to the fallback.
+  - On gpt-oss, chat first scored 24 / 30. The small model's reasoning ran past the 200-token intent limit, and it guessed a category next to a merchant ("DStv" filtered to Entertainment). A bigger token budget and two prompt rules brought it back to 29 / 30.
+  - Categorization is still below Gemini. Incoming transfers from people land in Transfers instead of Income, and a few one-off places ("Slot", "Rufus & Bee") get the next-closest category. Raising reasoning effort made it worse, because a batch ran out of tokens.
+- **The one chat miss.** "Bolt in the last 3 months" came back as ₦94,800 instead of ₦135,800. The small model started the window at the beginning of February, which drops January's rides. It gets the window right when run alone, so this is run-to-run variance in date resolution.
+
+Free-tier limits (October 2026):
+- Groq: 1,000 requests a day and 8,000 tokens a minute per model.
+- Gemini: 3.5 Flash allows 20 requests a day, so Flash-Lite is the fallback.
+
+CI runs the parsing suite on every pull request. Full results are in [`evals/results/baseline.json`](evals/results/baseline.json).
 
 ## Tech stack
 
 - **Frontend:** Next.js 16 and React 19 for the app router and server rendering; Tailwind v4 with the FinSight design tokens; Motion for the highlighter swipe and count-ups (all off under reduced motion).
 - **Backend:** FastAPI on Python 3.12, because parsing and the AI pipeline need pandas and pdfplumber. uv, ruff and pyright.
 - **Data:** Neon Postgres (free tier that doesn't pause the project away), psycopg 3, numbered SQL migrations.
-- **AI:** Groq (Llama 3.3 70B for answers, Llama 3.1 8B for intent) with Gemini's free tier as the fallback, through one small module with timeouts and a 429 retry.
+- **AI:** Groq (gpt-oss-120b for answers and categorization, gpt-oss-20b for intent) with Gemini's free tier as the fallback, through one small module with timeouts and a 429 retry.
 - **Payments:** Paystack, which takes naira cards and transfers.
 - **Infra:** Vercel for both apps, GitHub Actions for lint, typecheck, tests and the parsing eval.
 

@@ -24,7 +24,9 @@ API = HERE.parent / "apps" / "api"
 sys.path.insert(0, str(API))
 load_dotenv(API / ".env")
 DB_URL = os.environ.get("EVAL_DATABASE_URL", "")
-os.environ.setdefault("DATABASE_URL", DB_URL or "postgresql://localhost/unused")
+# always the scratch database: a DATABASE_URL from .env would send chat queries to real data
+# while the expected figures come from the scratch seed
+os.environ["DATABASE_URL"] = DB_URL or "postgresql://localhost/unused"
 
 import psycopg  # noqa: E402
 from psycopg import sql  # noqa: E402

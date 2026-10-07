@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 /* ---------- Google button ---------- */

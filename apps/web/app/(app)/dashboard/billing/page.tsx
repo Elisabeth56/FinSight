@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Check, Loader2, Sparkles, Zap } from "lucide-react";
 
 import { api, ApiError } from "@/lib/api";

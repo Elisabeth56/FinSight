@@ -30,9 +30,7 @@ export async function proxy(request: NextRequest) {
   return supabaseResponse;
 }
 
+// only app and auth routes need the session; marketing pages stay static and auth-free
 export const config = {
-  matcher: [
-    // Skip Next internals, static assets, and image optimization
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/dashboard/:path*", "/login", "/signup"],
 };

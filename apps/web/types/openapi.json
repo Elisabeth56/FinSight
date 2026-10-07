@@ -110,6 +110,21 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "MeIn": {
+        "properties": {
+          "full_name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Full Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "full_name"
+        ],
+        "title": "MeIn",
+        "type": "object"
+      },
       "MeOut": {
         "properties": {
           "email": {
@@ -130,6 +145,10 @@
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "is_demo": {
+            "title": "Is Demo",
+            "type": "boolean"
           },
           "is_pro": {
             "title": "Is Pro",
@@ -170,7 +189,8 @@
           "is_pro",
           "pro_until",
           "uploads_this_month",
-          "upload_limit"
+          "upload_limit",
+          "is_demo"
         ],
         "title": "MeOut",
         "type": "object"
@@ -772,6 +792,51 @@
           }
         ],
         "summary": "Read Me",
+        "tags": [
+          "me"
+        ]
+      },
+      "patch": {
+        "description": "Changes the display name. The shared demo account can't be changed.",
+        "operationId": "update_me_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Me",
         "tags": [
           "me"
         ]

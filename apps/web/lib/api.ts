@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { getAccessToken } from "@/lib/auth/token";
 
 // In production the web app rewrites /api/* to the API on the same origin, so there's no CORS.
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
@@ -24,9 +24,7 @@ type Options = Omit<RequestInit, "body"> & {
 };
 
 async function authHeader(): Promise<Record<string, string>> {
-  const supabase = createClient();
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+  const token = await getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 

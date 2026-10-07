@@ -16,3 +16,12 @@ export function guessCurrency(): "NGN" | "USD" {
   const lang = navigator.language || "";
   return zone === "Africa/Lagos" || lang.endsWith("-NG") ? "NGN" : "USD";
 }
+
+/** Compact figure for chart labels: 28450000 → "₦285k", 123000000 → "₦1.2m". */
+export function moneyShort(minor: number, currency = "NGN"): string {
+  const value = Math.abs(minor) / 100;
+  const symbol = SYMBOLS[currency] ?? `${currency} `;
+  if (value >= 1_000_000) return `${symbol}${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}m`;
+  if (value >= 1_000) return `${symbol}${Math.round(value / 1_000)}k`;
+  return `${symbol}${Math.round(value)}`;
+}

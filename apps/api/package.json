@@ -7,6 +7,7 @@
     "typecheck": "uv run pyright",
     "test": "uv run pytest -q",
     "db:migrate": "uv run python -m scripts.db migrate",
-    "db:seed": "uv run python -m scripts.db seed"
+    "db:seed": "uv run python -m scripts.db seed",
+    "openapi": "uv run python -m scripts.openapi"
   }
 }

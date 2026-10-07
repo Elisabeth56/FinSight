@@ -9,6 +9,7 @@
     "test": "pnpm -r test",
     "build": "pnpm --filter web build",
     "db:migrate": "pnpm --filter api db:migrate",
-    "db:seed": "pnpm --filter api db:seed"
+    "db:seed": "pnpm --filter api db:seed",
+    "api:types": "pnpm --filter web api:types"
   }
 }

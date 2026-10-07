@@ -35,6 +35,9 @@ class Settings(BaseSettings):
 
     paystack_secret_key: str = ""
 
+    # the shared demo account everyone signs into; it stays read-only so visitors can't rename it
+    demo_email: str = "demo@finsight.app"
+
     free_uploads_per_month: int = 1
     max_upload_bytes: int = 4 * 1024 * 1024  # Vercel's request body limit is 4.5 MB
 

@@ -52,7 +52,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Me
+         * @description Changes the display name. The shared demo account can't be changed.
+         */
+        patch: operations["update_me_me_patch"];
         trace?: never;
     };
     "/payments": {
@@ -244,6 +248,11 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** MeIn */
+        MeIn: {
+            /** Full Name */
+            full_name: string;
+        };
         /** MeOut */
         MeOut: {
             /** Email */
@@ -252,6 +261,8 @@ export interface components {
             full_name: string | null;
             /** Id */
             id: string;
+            /** Is Demo */
+            is_demo: boolean;
             /** Is Pro */
             is_pro: boolean;
             /** Pro Until */
@@ -502,6 +513,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    update_me_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

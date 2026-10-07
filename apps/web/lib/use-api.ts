@@ -6,6 +6,13 @@ import { api, ApiError } from "@/lib/api";
 
 type Result<T> = { path: string; data?: T; error?: ApiError };
 
+const INVALIDATE = "finsight:invalidate";
+
+/** Tells every useApi showing `path` to fetch it again, e.g. the sidebar after a profile edit. */
+export function invalidate(path: string) {
+  window.dispatchEvent(new CustomEvent(INVALIDATE, { detail: path }));
+}
+
 /**
  * GETs `path` from the API and keeps the result. Pass null to skip. A new path starts a fresh
  * load; `reload` refetches the current one.
@@ -24,6 +31,13 @@ export function useApi<T>(path: string | null) {
       live = false;
     };
   }, [path, attempt]);
+
+  // refetch quietly when another screen changed this resource; the old data stays up meanwhile
+  useEffect(() => {
+    const onInvalidate = (e: Event) => (e as CustomEvent<string>).detail === path && setAttempt((n) => n + 1);
+    window.addEventListener(INVALIDATE, onInvalidate);
+    return () => window.removeEventListener(INVALIDATE, onInvalidate);
+  }, [path]);
 
   const reload = useCallback(() => {
     setResult(null);

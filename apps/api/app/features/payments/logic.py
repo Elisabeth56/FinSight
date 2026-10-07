@@ -33,7 +33,8 @@ def start_checkout(user: User, plan_id: PlanId, currency: Currency) -> tuple[str
     """Records a pending payment and returns (authorization_url, reference)."""
     plan = PLANS[plan_id]
     reference = f"fs_{secrets.token_hex(10)}"
-    callback = f"{settings.cors_origins[0]}/dashboard/billing/callback"
+    # Paystack appends ?reference=...; the billing page verifies it on load
+    callback = f"{settings.app_url}/dashboard/billing"
 
     with connect() as conn:
         conn.execute(

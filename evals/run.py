@@ -17,9 +17,12 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 HERE = Path(__file__).parent
 API = HERE.parent / "apps" / "api"
 sys.path.insert(0, str(API))
+load_dotenv(API / ".env")
 DB_URL = os.environ.get("EVAL_DATABASE_URL", "")
 os.environ.setdefault("DATABASE_URL", DB_URL or "postgresql://localhost/unused")
 

@@ -1,42 +1,120 @@
 # FinSight
 
-AI-powered personal finance intelligence. Upload a bank statement, chat with your money, discover where to save.
+Reads the PDF or CSV statement your Nigerian bank or OPay wallet already gives you, sorts every line, highlights unusual charges and answers questions about your money with exact figures.
 
-**Stack**: Next.js 16 (App Router) · FastAPI · Supabase (Postgres + Auth) · Groq (LLaMA 3.3) · LlamaIndex · Recharts · Paystack
+[![CI](https://github.com/Elisabeth56/FinSight/actions/workflows/ci.yml/badge.svg)](https://github.com/Elisabeth56/FinSight/actions/workflows/ci.yml)
 
-> This project is being remodelled. Progress is tracked in #22 and decisions in `docs/decisions/`.
+![FinSight landing page](docs/screenshots/landing-1440.webp)
 
-## Project layout
+**Live demo:** goes up with the deploy ([#18](https://github.com/Elisabeth56/FinSight/issues/18)) · **Case study:** [docs/case-study.md](docs/case-study.md) · **Design decisions:** [docs/decisions](docs/decisions)
 
+## The problem
+
+Most Nigerian banks and wallets don't connect to budgeting apps, so tools built on Plaid-style bank links never reach the people using them. What everyone does have is a statement export, and it's written for the bank's systems: `TRF/NIP/FBN/OKONKWO C/09203941` tells you very little about where the month went.
+
+## What it does
+
+- **Reads statements:** CSV exports and PDFs, including OPay's layout where narrations wrap across lines. No bank login.
+- **Sorts every line** into twelve plain categories and gives it a readable name ("Transfer to C. Okonkwo").
+- **Highlights the odd one:** a charge far above your usual for that category gets marked as it lands.
+- **Shows the month:** spent, money in, top category, six months side by side, recent rows.
+- **Answers questions** like "How much did I spend on Bolt in the last 3 months?" with figures added up by the database, and links each answer to the rows behind it.
+- **Savings report (Pro):** a few specific cuts with the naira worked out from your own rows. Pro is a one-time pass in NGN or USD through Paystack.
+
+| Overview | Chat |
+|---|---|
+| ![Overview](docs/screenshots/overview-1440.webp) | ![Chat](docs/screenshots/chat-1440.webp) |
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI[Next.js pages]
+  end
+  subgraph Vercel
+    WEB[apps/web<br/>Next.js 16]
+    API[apps/api<br/>FastAPI]
+  end
+  subgraph Neon[Neon Postgres, Frankfurt]
+    DB[(profiles, statements,<br/>transactions, payments)]
+  end
+  LLM[Groq<br/>fallback: Gemini]
+  PAY[Paystack]
+
+  UI --> WEB
+  WEB -- "/api/* rewrite, same origin" --> API
+  API -- "SQL scoped by user_id" --> DB
+  API -- "categorize, chat, savings" --> LLM
+  API -- "initialize, verify" --> PAY
 ```
-finsight/
-├── apps/
-│   ├── web/          # Next.js · TypeScript · Tailwind
-│   └── api/          # FastAPI · Python 3.12 · uv
-├── docs/             # architecture and decision records
-└── pnpm-workspace.yaml
-```
 
-## Local development
+1. The browser only talks to the web app. `/api/*` is rewritten to the FastAPI deployment, so there's no CORS.
+2. **Upload:** parse the file (pandas, pdfplumber), dedupe narrations, categorize the unique ones in batches, flag anomalies against 90 days of history, and insert everything in one transaction.
+3. **Chat:** a small model turns the question into filters (dates, category, merchant). SQL computes the totals and fetches the matching rows. The answer model streams over SSE using only those numbers, and the stream ends with the sources the UI shows as chips.
+4. **Savings:** SQL averages 90 days of spending; the model picks which category or merchant to cut and by what share; code works out the naira.
 
-Prerequisites: Node 22 with pnpm, Python 3.12+ with [uv](https://docs.astral.sh/uv/).
+More detail, including the data model and capacity maths, is in [docs/architecture.md](docs/architecture.md).
+
+## Engineering decisions
+
+- **The model never does arithmetic.** Every figure on screen or in a chat answer comes from SQL; the model only picks filters and words. Alternative: let the model read rows and sum them. It's simpler, but it gets totals wrong often enough to matter on a money app.
+- **Dedupe before categorizing.** Nigerian statements repeat the same narrations (Bolt, airtime, POS at the same shop). Categorizing unique narrations and mapping results back cuts LLM calls by roughly two thirds, which keeps a 600-row statement inside Groq's free per-minute limit. Alternative: one call per row or per fixed batch.
+- **Money as signed integer kobo, totals per currency.** The old schema stored amounts as text and added NGN to USD. Now `amount_minor bigint` and every summary groups by currency.
+- **One-time Pro passes with `pro_until`.** Subscriptions meant webhooks, renewals and a plan flag that never got reset. A pass extends `pro_until`, verification is idempotent by reference, and expiry needs no cron ([ADR 005](docs/decisions/005-payments.md)).
+- **Postgres on Neon, plain SQL, no ORM.** The data is relational and the queries are aggregates; psycopg and hand-written SQL keep them readable and testable against a real database ([ADR 001](docs/decisions/001-database.md)).
+
+## AI quality
+
+Three golden sets in [`evals/`](evals), scored by one script (`pnpm eval`):
+
+| Suite | Cases | Metric | Latest |
+|---|---|---|---|
+| Parsing | GTBank CSV, Access CSV, OPay-style PDF | rows, total and currency exact | 3 / 3 files |
+| Categorization | 102 labelled Nigerian narrations | category accuracy, readable name kept | pending first run with a key |
+| Chat | 25 answerable + 5 unanswerable questions on the demo data | amount matches SQL, or no amount given | pending first run with a key |
+
+CI runs the parsing suite on every pull request. The categorization and chat baselines are recorded in `evals/results/baseline.json` once an AI key is configured.
+
+## Tech stack
+
+- **Frontend:** Next.js 16 and React 19 for the app router and server rendering; Tailwind v4 with the FinSight design tokens; Motion for the highlighter swipe and count-ups (all off under reduced motion).
+- **Backend:** FastAPI on Python 3.12, because parsing and the AI pipeline need pandas and pdfplumber. uv, ruff and pyright.
+- **Data:** Neon Postgres (free tier that doesn't pause the project away), psycopg 3, numbered SQL migrations.
+- **AI:** Groq (Llama 3.3 70B for answers, Llama 3.1 8B for intent) with Gemini's free tier as the fallback, through one small module with timeouts and a 429 retry.
+- **Payments:** Paystack, which takes naira cards and transfers.
+- **Infra:** Vercel for both apps, GitHub Actions for lint, typecheck, tests and the parsing eval.
+
+## Run locally
+
+You need Node 22 with pnpm, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Postgres 16 (local, or a Neon branch).
 
 ```bash
 pnpm install
 (cd apps/api && uv sync)
-cp apps/web/.env.example apps/web/.env.local   # fill in values
-cp apps/api/.env.example apps/api/.env          # fill in values
-pnpm dev                                        # web on :3000, API on :8000
+cp apps/web/.env.example apps/web/.env.local
+cp apps/api/.env.example apps/api/.env        # set DATABASE_URL; AI and Paystack keys are optional
+pnpm db:migrate && pnpm db:seed               # schema plus the demo account's three months
+pnpm dev                                      # web on :3000, API on :8000
 ```
 
-`pnpm lint`, `pnpm typecheck` and `pnpm test` run across both apps.
+Checks, as CI runs them:
 
-## Features
+```bash
+pnpm lint && pnpm typecheck
+TEST_DATABASE_URL=postgresql://localhost/finsight_test pnpm test   # a scratch database
+pnpm eval                                                           # parsing only, unless an AI key is set
+```
 
-- **Upload**: CSV + PDF bank statement parsing with column auto-detection
-- **Categorize**: LLM-based categorization into 12 fixed categories via Groq
-- **Anomaly detection**: Per-category z-score against 90-day baseline
-- **Chat**: RAG over your transactions with SSE streaming
-- **Savings report**: On-demand AI-generated opportunities
-- **Billing**: Paystack subscriptions + one-time payments in NGN/USD
-- **Plan gating**: 1 upload/mo free · Pro unlocks unlimited + savings reports
+Without `GROQ_API_KEY` or `GEMINI_API_KEY`, uploads still work and every row lands in Other; chat and the savings report say the AI is busy.
+
+## Limitations and next steps
+
+- Sign-in moves to Neon Auth with Google and email ([#6](https://github.com/Elisabeth56/FinSight/issues/6)); until then you can't sign in locally, and the demo account is reached through the seed.
+- Scanned (image-only) PDFs aren't read. The app says so and suggests the CSV export.
+- Anomaly detection is a per-category z-score. It catches a ₦45,000 Jumia order in a month of ₦15,000 ones, but not a slow creep.
+- One currency per statement: a statement that mixes currencies is read as a single one.
+
+## Author
+
+Elisabeth Nnamani · [GitHub](https://github.com/Elisabeth56) · [nnamanielisabeth@gmail.com](mailto:nnamanielisabeth@gmail.com)

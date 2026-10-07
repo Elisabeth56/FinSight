@@ -154,13 +154,12 @@ def eval_categorize(usage: Usage) -> dict:
 def seed_eval_user() -> None:
     """Fresh schema and the demo account under EVAL_USER, so expected figures are known."""
     os.environ["DATABASE_URL"] = DB_URL
-    os.environ["DEMO_USER_ID"] = EVAL_USER
     from scripts import db
 
     with psycopg.connect(DB_URL, autocommit=True) as conn:
         conn.execute("drop schema public cascade; create schema public")
     db.migrate()
-    db.seed()
+    db.seed(EVAL_USER)
 
 
 def expected_minor(case: dict) -> int:

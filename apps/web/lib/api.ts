@@ -2,8 +2,9 @@
 
 import { getAccessToken } from "@/lib/auth/token";
 
-// In production the web app rewrites /api/* to the API on the same origin, so there's no CORS.
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// Always same-origin: the web server forwards /api/* to the API, so there's no CORS. Not read from
+// env on purpose; a leftover NEXT_PUBLIC_API_URL once sent production traffic to a dead host.
+export const API_URL = "/api";
 
 /** The API's one error shape: {error: {code, message, details}}. `message` is safe to show. */
 export class ApiError extends Error {

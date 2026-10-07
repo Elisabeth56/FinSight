@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 CURRENCY_SYMBOLS = {
     "₦": "NGN",
     "NGN": "NGN",
-    "N$": "NGN",
     "$": "USD",
     "USD": "USD",
     "€": "EUR",
@@ -42,11 +41,11 @@ CURRENCY_SYMBOLS = {
 
 
 def detect_currency(sample_text: str) -> str:
-    """Best-effort currency detection. Defaults to USD."""
+    """Best-effort currency detection. Bare amounts are NGN, as Nigerian exports print them."""
     for sym, code in CURRENCY_SYMBOLS.items():
         if sym in sample_text:
             return code
-    return "USD"
+    return "NGN"
 
 
 def _clean_amount(raw: str | float | int | None) -> Decimal | None:
@@ -149,7 +148,7 @@ def parse_csv(file_bytes: bytes) -> ParseResult:
         )
 
     if df.empty:
-        return ParseResult(transactions=[], currency="USD")
+        return ParseResult(transactions=[], currency="NGN")
 
     date_col = _find_col(df.columns, DATE_COL_HINTS)
     desc_col = _find_col(df.columns, DESC_COL_HINTS)

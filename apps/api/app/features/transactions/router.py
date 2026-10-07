@@ -1,5 +1,6 @@
 """GET /transactions: the signed-in user's rows, filtered and paged in SQL."""
 
+import uuid
 from datetime import date
 
 from fastapi import APIRouter, Query
@@ -48,6 +49,7 @@ def list_transactions(
     category: str | None = None,
     search: str | None = Query(None, max_length=80),
     flagged: bool = False,
+    statement_id: uuid.UUID | None = None,
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> TransactionPage:
@@ -65,6 +67,9 @@ def list_transactions(
         params += [f"%{search}%", f"%{search}%"]
     if flagged:
         where.append(sql.SQL("is_anomaly"))
+    if statement_id:
+        where.append(sql.SQL("statement_id = %s"))
+        params.append(str(statement_id))
 
     with connect() as conn:
         query = sql.SQL(

@@ -1,8 +1,10 @@
+from datetime import date
 from pathlib import Path
 
 import psycopg
 
 from app.features.statements import categorize
+from app.features.statements.logic import next_month_start
 from tests.conftest import TEST_DB, client_for, make_user, seed_demo
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -112,6 +114,10 @@ def test_transaction_filters_and_search():
     flagged = client.get("/transactions?month=2026-03&flagged=true").json()
     assert {t["merchant"] for t in flagged["transactions"]} == {"Jumia", "HealthPlus Pharmacy"}
 
+    march = next(s for s in client.get("/statements").json() if "march" in s["filename"])
+    rows = client.get(f"/transactions?statement_id={march['id']}&limit=200").json()
+    assert rows["total"] == march["row_count"] == 41
+
     bad = client.get("/transactions?month=March")
     assert bad.status_code == 422
     assert bad.json()["error"]["code"] == "invalid_month"
@@ -136,6 +142,8 @@ def test_csv_upload_stores_rows_and_rejects_the_same_file_twice(monkeypatch):
     res = client.post("/statements", files={"file": ("gtbank_march.csv", csv, "text/csv")})
     assert res.status_code == 201, res.text
     assert res.json()["row_count"] == 5
+    # the GTBank export prints bare amounts with no currency mark
+    assert res.json()["currency"] == "NGN"
 
     rows = client.get("/transactions").json()["transactions"]
     assert (
@@ -157,6 +165,12 @@ def test_free_plan_gets_one_upload_a_month(monkeypatch):
     second = client.post("/statements", files={"file": ("b.csv", csv + b"\n", "text/csv")})
     assert second.status_code == 402
     assert second.json()["error"]["code"] == "upload_quota_reached"
+    assert "Your next free upload is on 1 " in second.json()["error"]["message"]
+
+
+def test_free_upload_resets_on_the_first_of_next_month():
+    assert next_month_start(date(2026, 3, 14)) == date(2026, 4, 1)
+    assert next_month_start(date(2026, 12, 31)) == date(2027, 1, 1)
 
 
 def test_oversized_upload_is_refused_with_a_plain_message():

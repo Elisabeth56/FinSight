@@ -4,6 +4,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { UploadProvider } from "@/components/app/upload-provider";
 import { Logo, LogoMark } from "@/components/ui/logo";
 import type { Me } from "@/lib/models";
 import { useApi } from "@/lib/use-api";
@@ -28,12 +29,14 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="min-h-dvh bg-paper lg:flex">
-      <Sidebar pathname={pathname} />
-      <MobileHeader />
-      <main className="min-w-0 flex-1 px-4 pt-4 pb-28 sm:px-8 lg:px-12 lg:pt-8 lg:pb-12">{children}</main>
-      <MobileTabs pathname={pathname} />
-    </div>
+    <UploadProvider>
+      <div className="min-h-dvh bg-paper lg:flex">
+        <Sidebar pathname={pathname} />
+        <MobileHeader />
+        <main className="min-w-0 flex-1 px-4 pt-4 pb-28 sm:px-8 lg:px-12 lg:pt-8 lg:pb-12">{children}</main>
+        <MobileTabs pathname={pathname} />
+      </div>
+    </UploadProvider>
   );
 }
 

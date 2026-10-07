@@ -36,6 +36,12 @@ def uploads_this_month(user_id: str) -> int:
     return row["n"]
 
 
+def next_month_start(today: date | None = None) -> date:
+    """The day the free upload allowance resets."""
+    today = today or datetime.now(UTC).date()
+    return date(today.year + today.month // 12, today.month % 12 + 1, 1)
+
+
 def upload_statement(user: User, contents: bytes, filename: str, content_type: str) -> StatementOut:
     """Runs the whole pipeline. Nothing is stored unless every step succeeds."""
     # validate
@@ -47,7 +53,8 @@ def upload_statement(user: User, contents: bytes, filename: str, content_type: s
         raise AppError(
             402,
             "upload_quota_reached",
-            "You've used this month's free upload. Pro gives you unlimited uploads.",
+            f"Your next free upload is on {next_month_start():%-d %B}."
+            " Pro gives you unlimited uploads and savings reports.",
         )
 
     sha256 = hashlib.sha256(contents).hexdigest()
@@ -144,7 +151,8 @@ def list_statements(user_id: str) -> list[StatementOut]:
             "select s.id::text, s.filename, s.currency, s.period_start, s.period_end, s.row_count,"
             " count(t.id) filter (where t.is_anomaly) as anomaly_count"
             " from statements s left join transactions t on t.statement_id = s.id"
-            " where s.user_id = %s group by s.id order by s.created_at desc",
+            " where s.user_id = %s group by s.id"
+            " order by s.period_start desc nulls last, s.created_at desc",
             (user_id,),
         ).fetchall()
     return [StatementOut(**r) for r in rows]

@@ -39,3 +39,5 @@ Changes this forces in the code:
 ## Revisit when
 
 Uploads approach 300s, statements over 4 MB become common, or real payments go live.
+
+Setup and environment variables: [docs/deploy.md](../deploy.md).

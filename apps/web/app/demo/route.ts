@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
   const failed = NextResponse.redirect(new URL("/login?error=demo_unavailable", request.url));
   const email = process.env.DEMO_EMAIL;
   const password = process.env.DEMO_PASSWORD;
-  if (!auth || !email || !password) return failed;
+  if (!auth || !email || !password) {
+    console.error("demo: missing", { auth: !!auth, email: !!email, password: !!password });
+    return failed;
+  }
 
   // sign in through our own /api/auth proxy as our own origin: visitors arriving from a link
   // elsewhere (GitHub, a CV) carry a referrer that Neon Auth's trusted-origin check refuses
@@ -23,7 +26,11 @@ export async function GET(request: NextRequest) {
     }),
     { params: Promise.resolve({ path: ["sign-in", "email"] }) },
   );
-  if (!signIn.ok) return failed;
+  if (!signIn.ok) {
+    // usually the demo user is missing from Neon Auth or DEMO_PASSWORD no longer matches it
+    console.error("demo: sign-in refused", signIn.status, await signIn.text());
+    return failed;
+  }
 
   const res = NextResponse.redirect(new URL("/dashboard", request.url));
   for (const cookie of signIn.headers.getSetCookie()) res.headers.append("set-cookie", cookie);
